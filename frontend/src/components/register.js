@@ -1,117 +1,253 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { AuthContext } from "../context/AuthContext";
+import "./AuthForms.css";
 
-function Register() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,})$/;
+const PHONE_REGEX = /^(98|97)\d{8}$/;
+
+export default function Register() {
+  const { register } = useContext(AuthContext);
   const navigate = useNavigate();
-  const auth = useAuth();
 
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const validate = () => {
+    const trimmedName = fullName.trim();
+    const trimmedPhone = phone.trim();
+
+    if (!trimmedName) return "Full name is required.";
+    if (!FULL_NAME_REGEX.test(trimmedName)) {
+      return "Full name must be like 'Ram Kumar' with 2 words, each 3+ letters, starting with a capital letter.";
+    }
+    if (!PHONE_REGEX.test(trimmedPhone)) {
+      return "Phone must be 10 digits and start with 98 or 97.";
+    }
+    if (!location.trim()) return "Location is required.";
+    if (password.length < 6) return "Password must be at least 6 characters.";
+    if (password !== confirm) return "Passwords do not match.";
+    return "";
+  };
+
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
     setLoading(true);
-    setErrorMsg('');
-    setSuccessMsg('');
-
     try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, password })
-      });
-
-      const data = await res.json();
-
-      if (data && data.success) {
-        // Use AuthContext to set state and localStorage
-        const userObj = { id: data.userId, name, phone, role: 'user' };
-        auth.login(userObj);
-        setSuccessMsg('Registration successful! Redirecting...');
-        setName('');
-        setPhone('');
-        setPassword('');
-
-        // Redirect after short delay
-        setTimeout(() => navigate('/dashboard'), 1500);
-      } else {
-        setErrorMsg(data.message || 'Registration failed');
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('Something went wrong. Please try again.');
-    } finally {
+      await register({ fullName, phone, location, password });
       setLoading(false);
+      navigate("/login");
+    } catch (err) {
+      setLoading(false);
+      setError(err?.message || "Registration failed. Try again.");
     }
   };
 
   return (
-    <div className="auth-wrap">
-      <div className={`auth-card ${mounted ? 'enter' : ''} register`}>
-        <div className="auth-side auth-left">
-          <h2 className="auth-head">Create Account</h2>
-          <p className="auth-sub">Register to start using the app.</p>
-        </div>
+    <motion.div 
+      className="auth-shell" 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="floating-element"></div>
+      <div className="floating-element"></div>
+      <div className="floating-element"></div>
+      
+      <motion.form 
+        className="auth-card" 
+        onSubmit={handleRegister}
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        whileHover={{ scale: 1.01 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.h2 
+          className="auth-title"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          Create account
+        </motion.h2>
+        
+        {error && (
+          <motion.div 
+            className="auth-error"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {error}
+          </motion.div>
+        )}
 
-        <div className="auth-side auth-right">
-          <form className="auth-form" onSubmit={handleSubmit} autoComplete="off">
-            <label className="field">
-              <input
-                className="input"
-                type="text"
-                placeholder=" "
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <span className="label">Full Name</span>
-            </label>
-            <label className="field">
-              <input
-                className="input"
-                type="tel"
-                placeholder=" "
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-              <span className="label">Phone</span>
-            </label>
-            <label className="field">
-              <input
-                className="input"
-                type="password"
-                placeholder=" "
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <span className="label">Password</span>
-            </label>
+        {/* Full name */}
+        <motion.label 
+          className="auth-label"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <span className="label-text">Full name</span>
+          <motion.input 
+            className="auth-input" 
+            type="text" 
+            value={fullName} 
+            onChange={(e) => setFullName(e.target.value)} 
+            placeholder="Your full name" 
+            required
+            whileFocus={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          />
+        </motion.label>
 
-            {errorMsg && <div className="error-message">{errorMsg}</div>}
-            {successMsg && <div className="success-message">{successMsg}</div>}
+        {/* Phone */}
+        <motion.label 
+          className="auth-label"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.45 }}
+        >
+          <span className="label-text">Phone</span>
+          <motion.input 
+            className="auth-input" 
+            type="tel" 
+            value={phone} 
+            onChange={(e) => setPhone(e.target.value)} 
+            placeholder="10-digit phone" 
+            required
+            whileFocus={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          />
+        </motion.label>
 
-            <div className="auth-actions">
-              <button className="btn" type="submit" disabled={loading}>
-                {loading ? 'Please wait…' : 'Register'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+        {/* Location */}
+        <motion.label 
+          className="auth-label"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+        >
+          <span className="label-text">Location</span>
+          <motion.input 
+            className="auth-input" 
+            type="text" 
+            value={location} 
+            onChange={(e) => setLocation(e.target.value)} 
+            placeholder="City, Area or Address" 
+            required
+            whileFocus={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+          />
+        </motion.label>
+
+        {/* Password */}
+        <motion.label 
+          className="auth-label password-field"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.55 }}
+        >
+          <span className="label-text">Password</span>
+          <div className="password-wrapper">
+            <motion.input
+              className="auth-input"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              required
+              whileFocus={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.span 
+              className="eye-icon" 
+              onClick={() => setShowPassword(!showPassword)}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </motion.span>
+          </div>
+        </motion.label>
+
+        {/* Confirm password */}
+        <motion.label 
+          className="auth-label password-field"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+        >
+          <span className="label-text">Confirm password</span>
+          <div className="password-wrapper">
+            <motion.input
+              className="auth-input"
+              type={showConfirm ? "text" : "password"}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder="Repeat your password"
+              required
+              whileFocus={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.span 
+              className="eye-icon" 
+              onClick={() => setShowConfirm(!showConfirm)}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              {showConfirm ? "🙈" : "👁️"}
+            </motion.span>
+          </div>
+        </motion.label>
+
+        <motion.button 
+          className="auth-btn primary" 
+          type="submit" 
+          disabled={loading}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.65 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {loading ? "Creating..." : "Create account"}
+        </motion.button>
+
+        <motion.div 
+          className="auth-footer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
+        >
+          <small>Already have an account?</small>
+          <motion.button 
+            type="button" 
+            className="auth-btn ghost" 
+            onClick={() => navigate("/login")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Sign in
+          </motion.button>
+        </motion.div>
+      </motion.form>
+    </motion.div>
   );
 }
-
-export default Register;

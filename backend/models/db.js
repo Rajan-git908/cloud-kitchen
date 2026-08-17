@@ -1,0 +1,139 @@
+import mysql from "mysql2";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT) || 3306,
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error("MySQL connection failed:", err);
+    console.error("Make sure MySQL is running on port 3306");
+    console.error("You can start MySQL using: net start MySQL");
+  } else {
+    console.log("MySQL connected successfully!");
+  }
+});
+
+// Handle connection errors
+db.on("error", (err) => {
+  console.error("MySQL connection error:", err);
+  if (err.code === "PROTOCOL_CONNECTION_LOST") {
+    console.error("Database connection was closed");
+  }
+});
+
+const createTables = () => {
+  console.log("Starting complete database schema creation...");
+
+  const queries = [
+    // Users table
+`CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  full_name VARCHAR(100) NOT NULL,
+  phone VARCHAR(15) NOT NULL UNIQUE,
+  location VARCHAR(100),
+  password VARCHAR(255) NOT NULL,
+  role ENUM('user', 'admin') DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+// Food Categories Table
+`CREATE TABLE IF NOT EXISTS food_categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`,
+
+// Menu Table
+`CREATE TABLE IF NOT EXISTS menu (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  description TEXT,
+  category_id INT NULL,
+  is_available TINYINT(1) NOT NULL DEFAULT 1,
+  image_url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES food_categories(id) 
+    ON UPDATE CASCADE ON DELETE SET NULL
+)`,
+
+// Orders Table
+`CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  status ENUM('Pending', 'Preparing', 'Out for Delivery', 'Completed', 'Cancelled') DEFAULT 'Pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)`,
+
+// Order Items Table
+`CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
+  menu_id INT NULL,
+  qty INT NOT NULL DEFAULT 1,
+  unit_price DECIMAL(10,2) NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (menu_id) REFERENCES menu(id) ON DELETE SET NULL
+)`,
+
+// Reviews Table
+`CREATE TABLE IF NOT EXISTS reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NULL,
+  name VARCHAR(100) NOT NULL,
+  text TEXT NOT NULL,
+  rating TINYINT NOT NULL DEFAULT 5,
+  approved BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+)`,
+  ];
+
+  const runQuery = (index) => {
+    if (index >= queries.length) {
+      console.log("All tables created successfully!");
+      return;
+    }
+    db.query(queries[index], (error) => {
+      if (error) {
+        console.error(`Error creating table (query ${index}):`, error.message);
+      } else {
+        console.log(`Table ${index + 1}/${queries.length} created successfully`);
+      }
+      runQuery(index + 1);
+    });
+  };
+
+  // Trigger running queries sequentially
+  runQuery(0);
+};
+
+const createViews = () => {
+  console.log("Creating database views...");
+};
+
+// Delay table creation to ensure connection is established
+setTimeout(() => {
+  console.log(" Checking database connection status...");
+  console.log(`Database state: ${db.state}`);
+
+  try {
+    createTables();
+  } catch (error) {
+    console.error("Error during table creation:", error);
+  }
+}, 1500);
+
+export default db;

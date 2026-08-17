@@ -1,120 +1,272 @@
-import React, { useEffect, useState } from "react";
-import OrdersList from './OrdersList';
-import ItemsList from './ItemsList';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
-function AdminDashboard() {
-  const auth = useAuth();
+//component/AdminDashboard.js
+// it should only handle add, edit,update and delete menu items, and shows customer reviews
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
+
+import ReviewSection from "./Admin/ReviewSection";
+import MenuSection from "./Admin/MenuSection";
+import OrderSection from "./Admin/OrderSection";
+import UserSection from "./Admin/UserSection";
+
+
+
+const menuCategories = ["Main Meals", "Fast Food & Snacks", "Healthy & Diet", "Desserts & Bakery", "Beverages"];
+
+export default function AdminDashboard() {
+  const { section } = useParams();
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [editing, setEditing] = useState(null);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [form, setForm] = useState({ name: "", price: "", category_id: "", image_url: "" });
+  const { token, apiBaseUrl } = useContext(AuthContext);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(menuCategories[0]);
+  const [image, setImage] = useState(null);
+  const [message, setMessage] = useState("");
+  const [menuItems, setMenuItems] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [previousOrderCount, setPreviousOrderCount] = useState(0);
+  const [newOrderNotification, setNewOrderNotification] = useState(null);
 
-  // Fetch categories + items from backend
-  useEffect(() => {
-    // redirect non-admin users away from this page
-    if (!auth || !auth.user || auth.user.role !== 'admin') {
-      navigate('/');
-      return;
+
+const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setLoadError("");
+      const menuRes = await axios.get(`${apiBaseUrl}/api/menu/admin`, { headers: { Authorization: `Bearer ${token}` } });
+      setMenuItems(menuRes.data);
+      const ordersRes = await axios.get(`${apiBaseUrl}/api/orders/admin`, { headers: { Authorization: `Bearer ${token}` } });
+      setOrders(ordersRes.data);
+      const reviewsRes = await axios.get(`${apiBaseUrl}/api/reviews/admin/all`, { headers: { Authorization: `Bearer ${token}` } });
+      setReviews(reviewsRes.data);
+    } catch (err) {
+      console.error(err);
+      setLoadError(err.response?.data?.error || "Data could not be loaded.");
+    } finally {
+      setLoading(false);
     }
+  }, [token, apiBaseUrl]);
 
-    fetch("/api/categories")
-      .then(res => res.json())
-      .then(setCategories);
 
-    fetch("/api/items")
-      .then(res => res.json())
-      .then(setItems);
-  }, []);
+useEffect(() => {
+    if (token) {
+      const pollOrders = async () => {
+        try {
+          const ordersRes = await axios.get(`${apiBaseUrl}/api/orders/admin`, { 
+            headers: { Authorization: `Bearer ${token}` } 
+          });
+          const currentOrders = ordersRes.data;
+          
+          if (currentOrders.length > previousOrderCount) {
+            const newOrders = currentOrders.slice(0, currentOrders.length - previousOrderCount);
+            if (newOrders.length > 0) {
+              const latestOrder = newOrders[0];
+              setNewOrderNotification({
+                id: latestOrder.id,
+                total: latestOrder.total,
+                timestamp: new Date(latestOrder.created_at).toLocaleTimeString()
+              });
+            }
+          }
+          setOrders(currentOrders);
+          setPreviousOrderCount(currentOrders.length);
+        } catch (err) {
+          console.error("Error polling orders:", err);
+        }
+      };
 
-  const startAdd = () => {
-    setEditing(null);
-    setForm({ name: "", price: "", category_id: "", image_url: "" });
-  };
+      loadData();
+      const pollInterval = setInterval(pollOrders, 10000);
+      return () => clearInterval(pollInterval);
+    }
+  }, [token, apiBaseUrl, previousOrderCount, loadData]);
 
-  const startEdit = (it) => {
-    setEditing(it.id);
-    setForm({ name: it.name, price: it.price, category_id: it.category_id, image_url: it.image_url });
-  };
-
-  const save = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.category_id) return;
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("description", description);
+      formData.append("category", category);
+      if (image) formData.append("image", image);
 
-    const headers = { "Content-Type": "application/json" };
-    if (auth && auth.user && auth.user.id) headers['x-user-id'] = auth.user.id;
+      if (editingId) {
+        await axios.put(`${apiBaseUrl}/api/menu/${editingId}`, formData, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } });
+        setMessage("Menu item updated successfully!");
+      } else {
+        await axios.post(`${apiBaseUrl}/api/menu`, formData, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } });
+        setMessage("Menu item added successfully!");
+      }
 
-    if (editing) {
-      await fetch(`/api/items/${editing}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(form)
-      });
-    } else {
-      const res = await fetch("/api/items", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(form)
-      });
-      const newItem = await res.json();
-      setItems(prev => [newItem, ...prev]);
-      setSuccessMsg("Item added successfully!");
+      setName("");
+      setPrice("");
+      setDescription("");
+      setCategory(menuCategories[0]);
+      setImage(null);
+      setEditingId(null);
+      loadData();
+    } catch (err) {
+      setMessage("Error: " + (err.response?.data?.error || err.message));
     }
-
-    setEditing(null);
-    setForm({ name: "", price: "", category_id: "", image_url: "" });
-    // Refresh items
-    fetch("/api/items")
-      .then(res => res.json())
-      .then(setItems);
   };
 
-  const remove = async (id) => {
-    if (!window.confirm("Delete this item?")) return;
-    const headers = { 'Content-Type': 'application/json' };
-    if (auth && auth.user && auth.user.id) headers['x-user-id'] = auth.user.id;
-    await fetch(`/api/items/${id}`, { method: "DELETE", headers });
-    setItems(prev => prev.filter(p => p.id !== id));
+  const startEdit = (item) => {
+    setEditingId(item.id);
+    setName(item.name);
+    setPrice(item.price);
+    setDescription(item.description || "");
+    setCategory(item.category || menuCategories[0]);
+    navigate("/admin/menu");
+  };
+
+  const removeItem = async (id) => {
+    try {
+      await axios.delete(`${apiBaseUrl}/api/menu/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      loadData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleAvailability = async (item) => {
+    try {
+      await axios.patch(`${apiBaseUrl}/api/menu/${item.id}/availability`, { is_available: !item.is_available }, { headers: { Authorization: `Bearer ${token}` } });
+      loadData();
+    } catch (err) {
+      setMessage("Unable to update item visibility");
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    try {
+      await axios.put(`${apiBaseUrl}/api/orders/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      loadData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const moderateReview = async (review, approved) => {
+    await axios.put(`${apiBaseUrl}/api/reviews/${review.id}`, { approved, rating: review.rating, text: review.text }, { headers: { Authorization: `Bearer ${token}` } });
+    loadData();
+  };
+
+  const removeReview = async (id) => {
+    await axios.delete(`${apiBaseUrl}/api/reviews/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+    loadData();
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'Preparing': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'Delivered': return 'bg-green-100 text-green-800 border-green-300';
+      case 'Cancelled': return 'bg-red-100 text-red-800 border-red-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const sortedOrders = [...orders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const renderActiveSection = () => {
+    switch (section) {
+      case "users":
+        return <UserSection />;
+      case "orders":
+        return (
+          <OrderSection 
+            orders={sortedOrders} 
+            updateStatus={updateStatus} 
+            getStatusColor={getStatusColor} 
+          />
+        );
+      case "menu":
+        return (
+          <MenuSection 
+            menuItems={menuItems}
+            apiBaseUrl={apiBaseUrl}
+            startEdit={startEdit}
+            toggleAvailability={toggleAvailability}
+            removeItem={removeItem}
+            handleSubmit={handleSubmit}
+            editingId={editingId}
+            name={name} setName={setName}
+            price={price} setPrice={setPrice}
+            description={description} setDescription={setDescription}
+            category={category} setCategory={setCategory}
+            setImage={setImage}
+            menuCategories={menuCategories}
+          />
+        );
+      default:
+        return (
+          <ReviewSection 
+            menuCount={menuItems.length} 
+            orderCount={orders.length} 
+            reviews={reviews} 
+            moderateReview={moderateReview} 
+            removeReview={removeReview} 
+          />
+        );
+    }
   };
 
   return (
-    <div className="admin-dashboard container">
+    <motion.div 
+      className="container py-4 dashboard-page admin-dashboard"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <AnimatePresence>
+        {newOrderNotification && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            className="fixed top-10 z-50 bg-gradient-to-r from-red-500 to-orange-500 text-white p-6 rounded-2xl shadow-2xl max-w-sm"
+          >
+            <div className="flex items-start gap-4">
+              <div className="bg-white/20 p-3 rounded-full">🛒</div>
+              <div className="flex-1">
+                <h4 className="font-bold text-lg mb-1">New Order Received!</h4>
+                <p className="text-sm opacity-90 mb-2">Order #{newOrderNotification.id} : Rs.{newOrderNotification.total}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setNewOrderNotification(null);
+                navigate("/admin/orders");
+              }} 
+              className="mt-4 w-full bg-white/20 py-2 rounded-lg font-semibold"
+            >
+              View Orders
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <h2>Admin Dashboard</h2>
-      <div className="admin-controls">
-      <button className="btn small" onClick={ startAdd}>Add Item</button>
-      </div>
+      {message && <div className="alert alert-info">{message}</div>}
+      {loadError && <div className="alert alert-danger">{loadError}</div>}
 
-      <form className="admin-form" onSubmit={save}>
-        <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input placeholder="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
-
-        {/* Dropdown for categories */}
-        <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
-          <option value="">Select Category</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.slug}</option>
-          ))}
-        </select>
-
-        <input placeholder="/images/name.png" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
-        <button className="btn small">Save</button>
-      </form>
-
-      <div style={{ marginTop: 12 }}>
-        <ItemsList items={items} onEdit={startEdit} onDelete={remove} />
-      </div>
-      <div className="admin-orders">
-        <h3>All Orders</h3>
-        <p>Manage orders below.</p>
-        <div style={{ marginTop: '12px' }}>
-          <OrdersList showActions={true} showFilters={true} includeItems={true} />
-        </div>
-      </div>
-    </div>
+      {loading ? (
+        <p className="studio-loading">Loading dashboard...</p>
+      ) : (
+        renderActiveSection()
+      )}
+    </motion.div>
   );
 }
 
-export default AdminDashboard;
+
+
+

@@ -1,144 +1,150 @@
-import React, { useState } from 'react';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import React, { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { CartContext } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
 
-export default function Checkout() {
-  const { items, total, clear } = useCart();
-
-  const [address, setAddress] = useState('');
-  const [guestName, setGuestName] = useState('');
-  const [guestPhone, setGuestPhone] = useState('');
-  const [guestEmail, setGuestEmail] = useState('');
+function Checkout() {
+  const { cartItems, clearCart } = useContext(CartContext);
+  const { token, user, apiBaseUrl } = useContext(AuthContext);
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
+  const navigate = useNavigate();
 
-  const auth = useAuth();
+  // Redirect guest users to /login page
+  useEffect(() => {
+    if (!token) {
+      navigate("/login", { replace: true });
+    }
+  }, [token, navigate]);
 
-  const buildOrderPayload = () => ({
-    user_id: (auth && auth.user && auth.user.id) || localStorage.getItem('mock_user_id') || null,
-    guest_name: guestName,
-    guest_phone: guestPhone,
-    guest_email: guestEmail,
-    address,
-    items: items.map(it => ({ item_id: it.id, qty: it.qty, price: it.price }))
-  });
+  const total = cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 
-  const placeOrderCOD = async () => {
-    if (items.length === 0) return setMsg('Cart is empty');
-    if (!address) return setMsg('Address required');
+  const placeOrder = async () => {
+    if (!token || !user) {
+      navigate("/login");
+      return;
+    }
 
-    setLoading(true);
     try {
-      const payload = { ...buildOrderPayload(), paymentMethod: 'cod' };
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMsg(`Order placed! ID: ${data.orderId}, Total: Rs. ${data.total}`);
-        clear();
-      } else {
-        setMsg(data.message || 'Order failed');
-      }
-    } catch (err) {
-      console.error(err);
-      setMsg('Something went wrong');
+      setLoading(true);
+      setStatus("");
+
+      // Format payload items to align with order_items schema
+      const itemsPayload = cartItems.map((item) => ({
+        menu_id: item.id,
+        qty: item.quantity,
+        price: Number(item.price),
+      }));
+
+      await axios.post(
+        `${apiBaseUrl}/api/orders`,
+        { total, items: itemsPayload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      clearCart();
+      setStatus("Order confirmed. Your kitchen is on it.");
+    } catch (error) {
+      setStatus(
+        error.response?.data?.error ||
+          (error.code === "ERR_NETWORK"
+            ? "The kitchen service is offline. Please start the backend and try again."
+            : "We could not place that order.")
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const payWithKhalti = () => {
-    if (items.length === 0) return setMsg('Cart is empty');
-    if (!address) return setMsg('Address required');
+  if (!token) return null;
 
-    if (typeof window === 'undefined' || !window.KhaltiCheckout) {
-      return setMsg('Khalti checkout not loaded');
-    }
+  return (
+    <motion.main
+      className="page-wrap checkout-page"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <span className="eyebrow">Almost there</span>
+        <h1>Review your order.</h1>
+      </motion.div>
 
-    const productIdentity = Date.now().toString();
-    const config = {
-      publicKey: process.env.REACT_APP_KHALTI_PUBLIC_KEY || 'test_public_key_xxx',
-      productIdentity,
-      productName: 'Food Order',
-      productUrl: window.location.origin + '/cart',
-      eventHandler: {
-        onSuccess: async (payload) => {
-          setLoading(true);
-          try {
-            // payload.amount is expected in paisa (smallest unit)
-            const serverPayload = {
-              ...buildOrderPayload(),
-              paymentMethod: 'khalti',
-              paymentToken: payload.token,
-              amount: payload.amount
-            };
-            const res = await fetch('/api/orders', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(serverPayload)
-            });
-            const data = await res.json();
-            if (data.success) {
-              setMsg(`Payment & order successful! ID: ${data.orderId}`);
-              clear();
-            } else {
-              setMsg(data.message || 'Order failed after payment');
-            }
-          } catch (err) {
-            console.error(err);
-            setMsg('Server error after payment');
-          } finally {
-            setLoading(false);
-          }
-        },
-        onError: (err) => {
-          console.error('Khalti error', err);
-          setMsg('Payment failed');
-        },
-        onClose: () => {
-          // optional
-        }
-      }
-    };
+      {cartItems.length === 0 ? (
+        <motion.p className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          Your cart is empty.{" "}
+          <motion.button
+            className="button-quiet"
+            onClick={() => navigate("/menu")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Browse the menu
+          </motion.button>
+        </motion.p>
+      ) : (
+        <motion.div
+          className="checkout-panel surface"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="customer-info-preview mb-3">
+            <p className="text-sm text-gray-600 mb-1">
+              <strong>Ordering as:</strong> {user?.full_name || user?.name} ({user?.phone})
+            </p>
+          </div>
 
-    try {
-      const checkout = new window.KhaltiCheckout(config);
-      // Khalti expects amount in paisa; multiply by 100 and round
-      const amountPaisa = Math.round(total * 100);
-      checkout.show({ amount: amountPaisa });
-    } catch (err) {
-      console.error('Khalti checkout init failed', err);
-      setMsg('Failed to open payment widget');
-    }
-  };
- 
-
-    return (
-    <div className="checkout">
-      <h2>Checkout</h2>
-      <textarea
-        className="form-control"
-        placeholder="Delivery address"
-        value={address}
-        onChange={e => setAddress(e.target.value)}
-      />
-      {! (auth && auth.user && auth.user.id) && (
-        <>
-          <input className="form-control" placeholder="Guest name" value={guestName} onChange={e => setGuestName(e.target.value)} />
-          <input className="form-control" placeholder="Guest phone" value={guestPhone} onChange={e => setGuestPhone(e.target.value)} />
-          <input className="form-control" placeholder="Guest email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)} />
-        </>
+          <div className="checkout-items">
+            {cartItems.map((item, index) => (
+              <motion.div
+                className="summary-line"
+                key={item.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+              >
+                <span>
+                  {item.name} <small>x {item.quantity}</small>
+                </span>
+                <strong>Rs. {(Number(item.price) * item.quantity).toFixed(2)}</strong>
+              </motion.div>
+            ))}
+          </div>
+          <div className="summary-total">
+            <span>Total</span>
+            <strong>Rs. {total.toFixed(2)}</strong>
+          </div>
+          <motion.button
+            className="button-primary checkout-button"
+            onClick={placeOrder}
+            disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {loading ? "Placing order..." : "Place order"}
+          </motion.button>
+        </motion.div>
       )}
-      <div>Total: Rs. {total.toFixed(2)}</div>
-      {msg && <div>{msg}</div>}
-      <div className="checkout-actions" style={{ marginTop: '8px' }}>
-        <button className="btn" onClick={payWithKhalti} disabled={loading}>Pay with Khalti</button>
-        
-        <button className="btn" onClick={placeOrderCOD} disabled={loading}>{loading ? 'Processing…' : 'Place Order (COD)'}</button>
-      </div>
-    </div>
+
+      {status && (
+        <motion.p
+          className="order-status"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          {status}
+        </motion.p>
+      )}
+    </motion.main>
   );
 }
+
+export default Checkout;

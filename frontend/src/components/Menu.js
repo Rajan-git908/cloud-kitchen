@@ -1,81 +1,163 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import axios from 'axios';
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { CartContext } from "../context/CartContext";
+import "../App.css";
+
+const menuCategories = ["All", "Main Meals", "Fast Food & Snacks", "Healthy & Diet", "Desserts & Bakery", "Beverages"];
 
 function Menu() {
-  const { addItem } = useCart();
-  const [groups, setGroups] = useState([]);
+  const [menu, setMenu] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const { addToCart } = useContext(CartContext);
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:5002";
+  
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (/^https?:\/\//i.test(imagePath)) return imagePath;
+    const normalizedPath = imagePath.replace(/\\/g, "/");
+    const imageName = normalizedPath.split("/").pop();
+    return `${apiBaseUrl.replace(/\/$/, "")}/images/${encodeURIComponent(imageName)}`;
+  };
 
   useEffect(() => {
-    //;
-axios.get("/api/items")      
-.then((response) => {        
-  const dbItems = response.data;        // Group items by category_id        
-const grouped = {};        
-dbItems.forEach((item) => {          
-  const catId = item.category_id;                    
-  const catTitle = item.category_title;              
-  if (!grouped[catId]) {            
-    grouped[catId] = { id: catId, title: catTitle, items: [] };          
-  }         
-   grouped[catId].items.push({            
-    id: item.id,            
-    name: item.name,            
-    price: item.price,            
-    image: item.image_url || '/images/placeholder.png',          
-  });        
-});        
-setGroups(Object.values(grouped));      
-})      
-.catch((error) => {        
-  console.error("Error fetching items:", error);
-  });
-  }, []);
+    axios.get(`${apiBaseUrl}/api/menu`)
+      .then((res) => setMenu(res.data))
+      .catch(() => setError("We could not connect to the menu service. Check that the backend is running on port 5002."))
+      .finally(() => setLoading(false));
+  }, [apiBaseUrl]);
+
+  const visibleMenu = selectedCategory === "All"
+    ? menu
+    : menu.filter((item) => (item.category || "Main Meals") === selectedCategory);
 
   return (
-    <div className="menu page">
-      <h2 className="menu-title">Menu</h2>
-      <main className="groups">
-        {groups.map((g) => (
-          <section key={g.id} className="group">
-            <h2 className="group-title">{g.title}</h2> 
-            <div className="group-grid">
-              {g.items.map((it, idx) => (
-                <article key={it.id} className="group-card" style={{ animationDelay: `${idx * 70}ms` }}>
-                  <div className="group-img">
-                    <img src={it.image} alt={it.name} loading="lazy" />
-                    <div className="group-price">Rs. {Number(it.price).toFixed(2)}</div>
-                  </div>
-                  <div className="group-body">
-                    <h3>{it.name}</h3>
-                    <div className="group-actions">
-                      <button
-                        className="btn add"
-                        aria-label={`Add ${it.name} to cart`}
-                        onClick={() => {
-                          addItem(it);
-                          const t = document.createElement('div');
-                          t.className = 'menu-toast';
-                          t.textContent = `${it.name} added to cart`;
-                          document.body.appendChild(t);
-                          setTimeout(() => t.classList.add('visible'), 10);
-                          setTimeout(() => {
-                            t.classList.remove('visible');
-                            setTimeout(() => { try { document.body.removeChild(t); } catch(e){} }, 300);
-                          }, 1400);
-                        }}
-                      >Add</button>
-                      <Link to={`/menu/${it.id}`} className="link small">More</Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
+    <motion.div 
+      className="menu-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.div 
+        className="section-heading"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div>
+          <span className="eyebrow">The daily menu</span>
+          <h2>Made fresh, delivered warm.</h2>
+        </div>
+      </motion.div>
+      
+      <motion.div 
+        className="category-filters" 
+        aria-label="Food categories"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        {menuCategories.map((category) => (
+          <motion.button
+            key={category}
+            className={`category-filter ${selectedCategory === category ? "active" : ""}`}
+            type="button"
+            onClick={() => setSelectedCategory(category)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {category}
+          </motion.button>
         ))}
-      </main>
-    </div>
+      </motion.div>
+      
+      {loading && (
+        <motion.p 
+          className="empty-state"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          Loading today's menu...
+        </motion.p>
+      )}
+      
+      {error && (
+        <motion.p 
+          className="empty-state"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          {error}
+        </motion.p>
+      )}
+      
+      {!loading && !error && menu.length === 0 && (
+        <motion.p 
+          className="empty-state"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          The menu is ready for its first dishes. An admin can add items from the studio.
+        </motion.p>
+      )}
+      
+      {!loading && !error && menu.length > 0 && visibleMenu.length === 0 && (
+        <motion.p 
+          className="empty-state"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          No dishes are available in this category yet.
+        </motion.p>
+      )}
+      
+      <div className="menu-grid">
+        {visibleMenu.map((item, index) => (
+          <motion.div
+            key={item.id}
+            className="menu-card"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            whileHover={{ y: -12, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {item.image_url ? (
+              <img 
+                src={getImageUrl(item.image_url)} 
+                alt={item.name} 
+                onError={(event) => { 
+                  event.currentTarget.replaceWith(Object.assign(document.createElement("div"), { 
+                    className: "menu-image-placeholder", 
+                    textContent: "🍽️" 
+                  })); 
+                }} 
+              />
+            ) : (
+              <div className="menu-image-placeholder">🍽️</div>
+            )}
+            <div className="menu-card-body">
+              <span className="category-tag">{item.category || "Main Meals"}</span>
+              <h3>{item.name}</h3>
+              <p>{item.description}</p>
+              <div className="price-row">
+                <span className="price">Rs. {item.price}</span>
+                <motion.button
+                  className="btn"
+                  onClick={() => addToCart(item)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Add
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 

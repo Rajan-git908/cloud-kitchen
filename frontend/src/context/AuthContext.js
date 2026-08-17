@@ -1,47 +1,85 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+//AuthContext.js
+import React, { createContext, useState, useEffect } from "react";
+import axios from "axios";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext();
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5002";
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const id = localStorage.getItem('mock_user_id');
-    if (!id) return null;
-    return {
-      id,
-      name: localStorage.getItem('mock_user_name') || null,
-      phone: localStorage.getItem('mock_user_phone') || null,
-      role: localStorage.getItem('mock_user_role') || null
-    };
-  });
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('mock_user_id', user.id);
-      localStorage.setItem('mock_user_name', user.name || '');
-      localStorage.setItem('mock_user_phone', user.phone || '');
-      localStorage.setItem('mock_user_role', user.role || 'user');
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
     }
-  }, [user]);
+    if (token && !user) {
+      axios.get(`${API_BASE_URL}/api/auth/profile`)
+        .then((res) => setUser(res.data))
+        .catch(() => {
+          setUser(null);
+          setToken("");
+          localStorage.removeItem("token");
+          delete axios.defaults.headers.common["Authorization"];
+        });
+    }
+  }, [token, user]);
 
-  const login = (userObj) => {
-    setUser(userObj);
+  const login = async (credentials, passwordArg) => {
+    const payload =
+      typeof credentials === "object" && credentials !== null
+        ? {
+            phone: credentials.phone ?? credentials.username,
+            password: credentials.password ?? passwordArg,
+          }
+        : { phone: credentials, password: passwordArg };
+
+    const res = await axios.post(`${API_BASE_URL}/api/auth/login`, payload);
+    setUser(res.data.user);
+    setToken(res.data.token);
+    localStorage.setItem("token", res.data.token);
+    return res.data.user;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('mock_user_id');
-    localStorage.removeItem('mock_user_name');
-    localStorage.removeItem('mock_user_phone');
-    localStorage.removeItem('mock_user_role');
+  const register = async ({ fullName, phone, location, password }) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, {
+        full_name: fullName,
+        phone,
+        location,
+        password,
+      });
+      return res.data;
+    } catch (err) {
+      throw err.response?.data || err;
+    }
+  };
+
+
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint to clear server session if needed
+      if (token) {
+        await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Continue with client-side logout even if backend call fails
+    } finally {
+      setUser(null);
+      setToken("");
+      localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, apiBaseUrl: API_BASE_URL }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+};
