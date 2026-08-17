@@ -128,7 +128,7 @@ export default function UserDashboard() {
       </div>
 
       <div className="card p-3 mt-4">
-        <h4>Order History</h4>
+        <h4>My Order</h4>
         {orders.length === 0 ? (
           <p>No orders yet.</p>
         ) : (
@@ -149,7 +149,7 @@ export default function UserDashboard() {
 
                 return (
                   <tr key={order.id}>
-                    <td>#{order.id}</td>
+                    <td>{order.id}</td>
                     <td>
                       <button
                         className="btn btn-sm btn-outline-primary"

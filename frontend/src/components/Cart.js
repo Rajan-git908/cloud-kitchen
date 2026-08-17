@@ -64,6 +64,7 @@ function Cart({ onPlaceOrder, tableMode = false }) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
+                  <h3>{item.name}</h3>
                   {item.image_url ? (
                     <img 
                       src={`${process.env.REACT_APP_API_BASE_URL || "http://localhost:5002"}${item.image_url}`} 
@@ -73,7 +74,7 @@ function Cart({ onPlaceOrder, tableMode = false }) {
                     <div className="cart-thumb">🍽️</div>
                   )}
                   <div className="cart-item-info">
-                    <h3>{item.name}</h3>
+                    
                     <p>Rs. {item.price} each</p>
                     <div className="quantity-control">
                       <motion.button
