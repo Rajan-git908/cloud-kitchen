@@ -1,0 +1,230 @@
+/* Dashboard Container & Layout */
+.admin-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.dashboard-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Alert Banners */
+.alert-banner {
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.alert-banner.info {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.alert-banner.danger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* Floating Toast Notification */
+.order-toast-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  width: calc(100% - 3rem);
+  max-width: 24rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.order-toast-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-toast-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.order-toast-icon-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: #ffedd5;
+  color: #ea580c;
+  border-radius: 50%;
+  font-size: 1.1rem;
+}
+
+.order-toast-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.order-toast-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.order-toast-close-btn:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+/* Details Card Inside Toast */
+.order-toast-body {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+}
+
+.order-toast-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  margin-bottom: 0.375rem;
+}
+
+.order-toast-row:last-child {
+  margin-bottom: 0;
+}
+
+.order-toast-id {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.order-toast-amount {
+  font-weight: 800;
+  color: #16a34a;
+  font-size: 1rem;
+}
+
+.order-toast-time {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Actions */
+.order-toast-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toast-btn-primary {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.25);
+  transition: all 0.2s ease;
+}
+
+.toast-btn-primary:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.toast-btn-secondary {
+  padding: 0.625rem 0.875rem;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toast-btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Studio Loading Spinner */
+.studio-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+}
+
+.studio-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid #e2e8f0;
+  border-top-color: #ea580c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.studio-loading-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 640px) {
+  .order-toast-container {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+}

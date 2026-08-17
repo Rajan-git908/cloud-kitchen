@@ -1,68 +1,174 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import "./OrderItem.css";
 
 export default function OrderItemModal({ order, onClose }) {
+  // Close modal when pressing the Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!order) return null;
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Pending": return "status-pending";
+      case "Preparing": return "status-preparing";
+      case "Out for Delivery": return "status-delivery";
+      case "Completed": return "status-completed";
+      case "Cancelled": return "status-cancelled";
+      default: return "status-default";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Pending": return "⏳";
+      case "Preparing": return "👨‍🍳";
+      case "Out for Delivery": return "🚚";
+      case "Completed": return "✅";
+      case "Cancelled": return "❌";
+      default: return "📦";
+    }
+  };
 
   return (
     <AnimatePresence>
-      <div className="modal-backdrop show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}>
-        <motion.div 
-          className="modal-dialog modal-dialog-centered"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
+      <motion.div
+        className="oim-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="oim-card"
+          initial={{ scale: 0.85, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.85, opacity: 0, y: 20 }}
+          transition={{ type: "spring", duration: 0.4 }}
+          onClick={(e) => e.stopPropagation()} // Prevent backdrop click from firing
         >
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Order #{order.id} Details</h5>
-              <button type="button" className="btn-close" onClick={onClose}></button>
+          {/* Header */}
+          <div className="oim-header">
+            <div>
+              <h3 className="oim-title">Order #{order.id} Details</h3>
+              <p className="oim-subtitle">
+                Placed on {new Date(order.created_at).toLocaleString()}
+              </p>
             </div>
-            <div className="modal-body">
-              <p className="mb-2"><strong>Status:</strong> <span className="badge bg-info">{order.status}</span></p>
-              <p className="mb-2"><strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}</p>
+            <button
+              type="button"
+              className="oim-close-btn"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
 
-              <table className="table table-bordered table-striped mt-3">
+          {/* Body */}
+          <div className="oim-body">
+            {/* Meta Information Bar */}
+            <div className="oim-meta-bar">
+              <div className="oim-meta-item">
+                <span className="oim-meta-label">Status:</span>
+                <span className={`oim-badge ${getStatusClass(order.status)}`}>
+                  {getStatusIcon(order.status)} {order.status}
+                </span>
+              </div>
+              {order.user_name && (
+                <div className="oim-meta-item">
+                  <span className="oim-meta-label">Customer:</span>
+                  <span className="oim-meta-value">{order.user_name} ({order.user_phone})</span>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="oim-table-wrapper oim-desktop-only">
+              <table className="oim-table">
                 <thead>
                   <tr>
                     <th>Item Name</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Subtotal</th>
+                    <th className="text-center">Qty</th>
+                    <th className="text-right">Unit Price</th>
+                    <th className="text-right">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   {order.items && order.items.length > 0 ? (
-                    order.items.map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.menu_item_name || item.name || `Item #${item.menu_id}`}</td>
-                        <td>{item.qty}</td>
-                        <td>Rs.{item.unit_price || item.price}</td>
-                        <td>Rs.{item.subtotal || (item.qty * (item.unit_price || item.price))}</td>
-                      </tr>
-                    ))
+                    order.items.map((item, index) => {
+                      const unitPrice = Number(item.unit_price || item.price || 0);
+                      const qty = Number(item.qty || 0);
+                      const subtotal = Number(item.subtotal || qty * unitPrice);
+
+                      return (
+                        <tr key={index}>
+                          <td className="oim-item-name">
+                            {item.menu_item_name || item.name || `Item #${item.menu_id}`}
+                          </td>
+                          <td className="text-center">{qty}</td>
+                          <td className="text-right">Rs. {unitPrice}</td>
+                          <td className="text-right oim-subtotal">Rs. {subtotal}</td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center">No item details found.</td>
+                      <td colSpan="4" className="oim-empty-cell">
+                        No item details found.
+                      </td>
                     </tr>
                   )}
                 </tbody>
-                <tfoot>
-                  <tr>
-                    <th colSpan="3" className="text-end">Total Amount:</th>
-                    <th>Rs.{order.total}</th>
-                  </tr>
-                </tfoot>
               </table>
             </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>
-                Close
-              </button>
+
+            {/* Mobile Card List View */}
+            <div className="oim-mobile-list oim-mobile-only">
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, index) => {
+                  const unitPrice = Number(item.unit_price || item.price || 0);
+                  const qty = Number(item.qty || 0);
+                  const subtotal = Number(item.subtotal || qty * unitPrice);
+
+                  return (
+                    <div key={index} className="oim-mobile-card">
+                      <div>
+                        <div className="oim-item-name">
+                          {item.menu_item_name || item.name || `Item #${item.menu_id}`}
+                        </div>
+                        <div className="oim-mobile-sub">
+                          {qty} × Rs. {unitPrice}
+                        </div>
+                      </div>
+                      <div className="oim-subtotal">Rs. {subtotal}</div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="oim-empty-cell">No item details found.</div>
+              )}
             </div>
           </div>
+
+          {/* Footer */}
+          <div className="oim-footer">
+            <div className="oim-total-container">
+              <span className="oim-total-label">Total Amount</span>
+              <span className="oim-total-value">Rs. {Number(order.total || 0).toFixed(2)}</span>
+            </div>
+            <button type="button" className="oim-btn-close" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </motion.div>
-      </div>
+      </motion.div>
     </AnimatePresence>
   );
 }
