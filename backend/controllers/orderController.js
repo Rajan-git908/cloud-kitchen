@@ -1,5 +1,6 @@
 //order controller
 import db from "../models/db.js";
+
 export const fetchOrders = (req, res) => {
   const userId = req.user?.id || req.userId;
   
@@ -70,9 +71,12 @@ export const placeOrder = (req, res) => {
 export const fetchAllOrders = (req, res) => {
   db.query(
     `SELECT o.id, o.user_id, o.total, o.status, o.created_at,
-            u.full_name as user_name, u.phone as user_phone, u.location as user_location
+            u.full_name as user_name, u.phone as user_phone, u.location as user_location,
+            COUNT(oi.id) as item_count
      FROM orders o 
      LEFT JOIN users u ON o.user_id = u.id 
+     LEFT JOIN order_items oi ON o.id = oi.order_id
+     GROUP BY o.id
      ORDER BY o.created_at DESC`,
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message || "Database error" });
@@ -80,6 +84,7 @@ export const fetchAllOrders = (req, res) => {
     }
   );
 };
+
 
 export const getOrderById = (req, res) => {
   const { id } = req.params;
@@ -93,7 +98,7 @@ export const getOrderById = (req, res) => {
     [id],
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message || "Database error" });
-      if (!results.length) return res.status(404).json({ error: "Order ot found" });
+      if (!results.length) return res.status(404).json({ error: "Order not found" });
       res.json(results[0]);
     }
   );

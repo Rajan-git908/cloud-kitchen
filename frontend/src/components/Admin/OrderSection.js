@@ -47,6 +47,7 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
                     >
                       <option value="Pending">⏳ Pending</option>
                       <option value="Preparing">👨‍🍳 Preparing</option>
+                      <option value="On the way">🚴 On the way</option>
                       <option value="Delivered">✅ Delivered</option>
                       <option value="Cancelled">❌ Cancelled</option>
                     </select>
