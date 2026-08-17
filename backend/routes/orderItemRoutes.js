@@ -1,3 +1,4 @@
+
 import express from "express";
 import { 
   getOrderItems, 
@@ -10,8 +11,10 @@ import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Admin routes for order item management
-router.get("/order/:order_id", verifyToken, isAdmin, getOrderItems);
+// Allow regular logged-in users to view order items
+router.get("/order/:order_id", verifyToken, getOrderItems);
+
+// Admin management routes
 router.post("/", verifyToken, isAdmin, createOrderItem);
 router.post("/bulk", verifyToken, isAdmin, bulkAddOrderItems);
 router.put("/:id", verifyToken, isAdmin, updateOrderItem);

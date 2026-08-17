@@ -1,6 +1,7 @@
 //order controller
 import db from "../models/db.js";
 
+/*
 export const fetchOrders = (req, res) => {
   const userId = req.user?.id || req.userId;
   
@@ -16,6 +17,54 @@ export const fetchOrders = (req, res) => {
     }
   );
 };
+*/
+// orderController.js
+export const fetchOrders = (req, res) => {
+  const userId = req.user?.id || req.userId;
+
+  db.query(
+    `SELECT 
+      o.id, o.user_id, o.total, o.status, o.created_at,
+      COALESCE(
+        JSON_ARRAYAGG(
+          IF(oi.id IS NOT NULL,
+            JSON_OBJECT(
+              'id', oi.id,
+              'menu_id', oi.menu_id,
+              'menu_item_name', m.name,
+              'qty', oi.qty,
+              'unit_price', oi.unit_price,
+              'subtotal', oi.subtotal
+            ),
+            NULL
+          )
+        ),
+        JSON_ARRAY()
+      ) as items
+     FROM orders o 
+     LEFT JOIN order_items oi ON o.id = oi.order_id
+     LEFT JOIN menu m ON oi.menu_id = m.id
+     WHERE o.user_id = ?
+     GROUP BY o.id
+     ORDER BY o.created_at DESC`,
+    [userId],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err.message || "Database error" });
+
+      const parsedResults = results.map(order => ({
+        ...order,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []).filter(Boolean)
+      }));
+
+      res.json(parsedResults);
+    }
+  );
+};
+
+
+
+
+
 
 export const placeOrder = (req, res) => {
   const userId = req.user?.id || req.userId;
@@ -67,24 +116,46 @@ export const placeOrder = (req, res) => {
     }
   );
 };
-
 export const fetchAllOrders = (req, res) => {
   db.query(
-    `SELECT o.id, o.user_id, o.total, o.status, o.created_at,
-            u.full_name as user_name, u.phone as user_phone, u.location as user_location,
-            COUNT(oi.id) as item_count
+    `SELECT 
+      o.id, o.user_id, o.total, o.status, o.created_at,
+      u.full_name as user_name, u.phone as user_phone, u.location as user_location,
+      COALESCE(
+        JSON_ARRAYAGG(
+          IF(oi.id IS NOT NULL,
+            JSON_OBJECT(
+              'id', oi.id,
+              'menu_id', oi.menu_id,
+              'menu_item_name', m.name,
+              'qty', oi.qty,
+              'unit_price', oi.unit_price,
+              'subtotal', oi.subtotal
+            ),
+            NULL
+          )
+        ),
+        JSON_ARRAY()
+      ) as items
      FROM orders o 
      LEFT JOIN users u ON o.user_id = u.id 
      LEFT JOIN order_items oi ON o.id = oi.order_id
+     LEFT JOIN menu m ON oi.menu_id = m.id
      GROUP BY o.id
      ORDER BY o.created_at DESC`,
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message || "Database error" });
-      res.json(results);
+
+      // Clean up stringified JSON outputs if database driver returns them as string
+      const parsedResults = results.map(order => ({
+        ...order,
+        items: typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []).filter(Boolean)
+      }));
+
+      res.json(parsedResults);
     }
   );
 };
-
 
 export const getOrderById = (req, res) => {
   const { id } = req.params;
