@@ -164,7 +164,7 @@ export default function UserDashboard() {
                         {getStatusIcon(order.status)} {order.status}
                       </span>
                     </td>
-                    <td>Rs. {order.total}</td>
+                    <td>Rs. {Number(order.total)+150}</td>
                     <td>{new Date(order.created_at).toLocaleString()}</td>
                   </tr>
                 );

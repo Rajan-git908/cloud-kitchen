@@ -125,12 +125,12 @@ function Cart({ onPlaceOrder, tableMode = false }) {
               <strong>Rs. {total.toFixed(2)}</strong>
             </div>
             <div className="summary-line">
-              <span>Delivery</span>
-              <span className="free-label">Included</span>
+              <span>Delivery Charge</span>
+              <span className="free-label">Rs. 150</span>
             </div>
             <div className="summary-total">
               <span>Total</span>
-              <strong>Rs. {total.toFixed(2)}</strong>
+              <strong>Rs. {(Number(total)+150).toFixed(2)}</strong>
             </div>
             <motion.div
               whileHover={{ scale: 1.02 }}

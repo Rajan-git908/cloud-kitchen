@@ -115,11 +115,17 @@ function Checkout() {
                 </span>
                 <strong>Rs. {(Number(item.price) * item.quantity).toFixed(2)}</strong>
               </motion.div>
+              
             ))}
           </div>
+          <div className="summary-line">
+            <strong> Delivery Charge</strong>
+            <strong>Rs. 150 </strong>
+            </div>
+            <hr></hr>
           <div className="summary-total">
             <span>Total</span>
-            <strong>Rs. {total.toFixed(2)}</strong>
+            <strong>Rs. {(Number(total)+150).toFixed(2)}</strong>
           </div>
           <motion.button
             className="button-primary checkout-button"

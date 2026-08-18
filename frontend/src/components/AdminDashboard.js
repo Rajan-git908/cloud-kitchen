@@ -354,7 +354,7 @@ export default function AdminDashboard() {
               <div className="order-toast-body">
                 <div className="order-toast-row">
                   <span className="order-toast-id">
-                    Order #{newOrderNotification.id}
+                    Order {newOrderNotification.id}
                   </span>
                   <span className="order-toast-amount">
                     Rs. {newOrderNotification.total}

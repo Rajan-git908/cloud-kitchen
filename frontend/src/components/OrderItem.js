@@ -56,10 +56,11 @@ export default function OrderItemModal({ order, onClose }) {
           {/* Header */}
           <div className="oim-header">
             <div>
-              <h3 className="oim-title">Order #{order.id} Details</h3>
+              <h3 className="oim-title">Order {order.id} Details</h3>
               <p className="oim-subtitle">
                 Placed on {new Date(order.created_at).toLocaleString()}
               </p>
+                
             </div>
             <button
               type="button"
@@ -85,6 +86,7 @@ export default function OrderItemModal({ order, onClose }) {
                 <div className="oim-meta-item">
                   <span className="oim-meta-label">Customer:</span>
                   <span className="oim-meta-value">{order.user_name} ({order.user_phone})</span>
+                 
                 </div>
               )}
             </div>
@@ -156,12 +158,17 @@ export default function OrderItemModal({ order, onClose }) {
               )}
             </div>
           </div>
+          <div className="oim-meta-bar">
+              <div className="oim-meta-item">
+                <span className="oim-meta-label">Delivery Charge:</span>
+              <span className="oim-meta-value">Rs. 150</span>
+              </div>            </div>
 
           {/* Footer */}
           <div className="oim-footer">
             <div className="oim-total-container">
               <span className="oim-total-label">Total Amount</span>
-              <span className="oim-total-value">Rs. {Number(order.total || 0).toFixed(2)}</span>
+              <span className="oim-total-value">Rs. {Number(order.total || 0)+ 150}</span>
             </div>
             <button type="button" className="oim-btn-close" onClick={onClose}>
               Close

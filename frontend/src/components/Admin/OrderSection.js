@@ -50,7 +50,7 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
                     </td>
                     <td>{order.user_phone}</td>
                     <td>{order.user_name}</td>
-                    <td>Rs.{order.total}</td>
+                    <td>Rs.{Number(order.total)+150}</td>
                     <td>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td>
                       <select 
