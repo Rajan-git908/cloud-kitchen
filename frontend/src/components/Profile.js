@@ -119,6 +119,7 @@ function Profile() {
                   Edit Profile
                 </button>
               )}
+              
             </div>
             <div className="card-body">
               {message && <div className="alert alert-success">{message}</div>}

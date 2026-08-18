@@ -20,6 +20,33 @@ export default function MenuSection({
 }) {
   return (
     <div id="menu">
+
+      {/* Form for Add/Edit Item */}
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="card p-3 mb-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h4>{editingId ? "Edit Menu Item" : "Add New Menu Item"}</h4>
+        <input className="form-control mb-2" type="text" placeholder="Item name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input className="form-control mb-2" type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} required />
+        <textarea className="form-control mb-2" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <select className="form-select mb-2" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Food category">
+          {menuCategories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+        <input className="form-control mb-2" type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+        <motion.button 
+          className="btn btn-primary" 
+          type="submit"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {editingId ? "Save Changes" : "Add Menu Item"}
+        </motion.button>
+      </motion.form>
+
       <motion.div 
         className="card p-3 mb-4"
         initial={{ opacity: 0, y: 20 }}
@@ -74,31 +101,6 @@ export default function MenuSection({
         </div>
       </motion.div>
 
-      {/* Form for Add/Edit Item */}
-      <motion.form 
-        onSubmit={handleSubmit} 
-        className="card p-3 mb-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h4>{editingId ? "Edit Menu Item" : "Add New Menu Item"}</h4>
-        <input className="form-control mb-2" type="text" placeholder="Item name" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input className="form-control mb-2" type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} required />
-        <textarea className="form-control mb-2" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <select className="form-select mb-2" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Food category">
-          {menuCategories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-        <input className="form-control mb-2" type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
-        <motion.button 
-          className="btn btn-primary" 
-          type="submit"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          {editingId ? "Save Changes" : "Add Menu Item"}
-        </motion.button>
-      </motion.form>
     </div>
   );
 }
