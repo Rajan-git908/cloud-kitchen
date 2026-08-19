@@ -13,6 +13,7 @@ function Footer() {
         <div className="footer-col contact">
           <h4>Come say hello</h4>
           <p>Email: <a href="mailto:support@cloudkitchen.example">support@cloudkitchen.com</a></p>
+          <p>Email: <a href="mailto:support@cloudkitchen.example">studentrajan908@gmail.com</a></p>
           <p>Phone: <a href="tel:+9779819877891">+977 9819877891</a></p>
         </div>
 
@@ -26,8 +27,8 @@ function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <small>© {new Date().getFullYear()} CloudKitchen — Made for good evenings.</small>
-      </div>
+        <small>© {new Date().getFullYear()} CloudKitchen — All Right Reserved. (Rajan Kumar Thakur)</small>
+              </div>
     </footer>
   );
 }
