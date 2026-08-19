@@ -43,6 +43,8 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/:section" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Footer />
       </Router>
