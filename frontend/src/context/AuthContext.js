@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
