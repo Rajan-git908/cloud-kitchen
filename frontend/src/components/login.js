@@ -58,7 +58,7 @@ export default function Login() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.3 }}
+       
       >
         <motion.h2
           className="auth-title"

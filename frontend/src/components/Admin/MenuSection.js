@@ -1,5 +1,3 @@
- 
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
@@ -121,7 +119,7 @@ export default function MenuSection({
           ))}
         </select>
 
-        {/* File Input with Validation Feedback */}
+        {/* File Input with Validation & File Name Feedback */}
         <div className="mb-2">
           <input 
             className={`form-control ${imageError ? "is-invalid" : ""}`} 
@@ -129,6 +127,11 @@ export default function MenuSection({
             accept="image/jpeg,image/png,image/webp" 
             onChange={handleImageChange} 
           />
+          {fileName && !imageError && (
+            <small className="text-muted mt-1 d-block">
+              Selected file: <strong>{fileName}</strong>
+            </small>
+          )}
           {imageError && <div className="invalid-feedback d-block">{imageError}</div>}
         </div>
 
@@ -173,7 +176,6 @@ export default function MenuSection({
                             src={getImageUrl(item.image_url)} 
                             alt={item.name} 
                             onError={(e) => {
-                              // Fallback for broken/failed server images
                               e.target.onerror = null;
                               e.target.style.display = "none";
                             }}

@@ -1,12 +1,11 @@
-
-//component/Admin/OrderSection.js
-// it should only handle order management
-import React, {useState} from "react";
-import { motion , AnimatePresence} from "framer-motion";
+// component/Admin/OrderSection.js
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import OrderItem from "../OrderItem";
 
 export default function OrdersSection({ orders, updateStatus, getStatusColor }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
+
   return (
     <motion.div
       className="card p-3 mb-4"
@@ -31,8 +30,7 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
               <th>Status</th>
             </tr>
           </thead>
-       
-<tbody>
+          <tbody>
             {orders.length ? (
               orders.map((order) => {
                 const itemCount = order.items?.length || order.item_count || 0;
@@ -50,7 +48,7 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
                     </td>
                     <td>{order.user_phone}</td>
                     <td>{order.user_name}</td>
-                    <td>Rs.{Number(order.total)+150}</td>
+                    <td>Rs.{Number(order.total) + 150}</td>
                     <td>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td>
                       <select 
@@ -72,14 +70,18 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
               <tr><td colSpan="7" className="table-empty">No customer orders yet.</td></tr>
             )}
           </tbody>
-
         </table>
       </div>
-{/* Item Details Modal */}
-      <OrderItem 
-        order={selectedOrder} 
-        onClose={() => setSelectedOrder(null)} 
-      />
+
+      {/* Item Details Modal with AnimatePresence */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <OrderItem 
+            order={selectedOrder} 
+            onClose={() => setSelectedOrder(null)} 
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

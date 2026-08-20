@@ -1,31 +1,18 @@
+// frontend/src/components/UserDashboard.js
 import React, { useEffect, useState, useContext } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import OrderItem from "./OrderItem";
 
-const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,})$/;
-const PHONE_REGEX = /^(98|97)\d{8}$/;
-
 export default function UserDashboard() {
-  const { token, user, apiBaseUrl } = useContext(AuthContext);
+  const { token, apiBaseUrl } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
-  const [profile, setProfile] = useState(user || null);
-  const [fullName, setFullName] = useState(user?.name || user?.full_name || "");
-  const [location, setLocation] = useState(user?.location || "");
   const [message, setMessage] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     if (token) {
-      axios.get(`${apiBaseUrl}/api/auth/profile`, { headers: { Authorization: `Bearer ${token}` } })
-        .then((res) => {
-          setProfile(res.data);
-          setFullName(res.data.full_name || "");
-          setLocation(res.data.location || "");
-        })
-        .catch((err) => console.error(err));
-
       axios.get(`${apiBaseUrl}/api/orders`, { headers: { Authorization: `Bearer ${token}` } })
         .then((res) => setOrders(res.data))
         .catch((err) => console.error(err));
@@ -164,7 +151,7 @@ export default function UserDashboard() {
                         {getStatusIcon(order.status)} {order.status}
                       </span>
                     </td>
-                    <td>Rs. {Number(order.total)+150}</td>
+                    <td>Rs. {Number(order.total) + 150}</td>
                     <td>{new Date(order.created_at).toLocaleString()}</td>
                   </tr>
                 );
@@ -173,10 +160,14 @@ export default function UserDashboard() {
           </table>
         )}
 
-        <OrderItem
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-        />
+        <AnimatePresence>
+          {selectedOrder && (
+            <OrderItem
+              order={selectedOrder}
+              onClose={() => setSelectedOrder(null)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
