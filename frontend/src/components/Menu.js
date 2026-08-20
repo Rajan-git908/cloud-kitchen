@@ -25,7 +25,7 @@ function Menu() {
   useEffect(() => {
     axios.get(`${apiBaseUrl}/api/menu`)
       .then((res) => setMenu(res.data))
-      .catch(() => setError("We could not connect to the menu service. Check that the backend is running on port 5002."))
+      .catch(() => setError("We could not connect to the menu service. Check that the backend is running on port 5000."))
       .finally(() => setLoading(false));
   }, [apiBaseUrl]);
 

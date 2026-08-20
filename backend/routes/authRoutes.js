@@ -9,8 +9,8 @@ const router = express.Router();
 router.post(
   "/register",
   body("full_name")
-    .matches(/^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,})$/)
-    .withMessage("Full name must be like 'Ram Kumar' with 2 words, each 3+ letters, starting with a capital letter."),
+    .matches(/^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,}){1,3}$/)
+    .withMessage("Full name must be like 'Ram Kumar' with 2-4 words, each 3+ letters, starting with a capital letter."),
   body("phone")
     .matches(/^(98|97)\d{8}$/)
     .withMessage("Phone must be 10 digits and start with 98 or 97."),

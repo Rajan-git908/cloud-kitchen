@@ -2,7 +2,7 @@ import mysql from "mysql2";
 import dotenv from "dotenv";
 
 dotenv.config();
-
+/*
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -10,14 +10,39 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT) || 3306,
 });
+*/
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT) || 21102,
+  ssl: {
+    rejectUnauthorized: false // Required for Aiven SSL connection
+  },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-db.connect((err) => {
+/*
+db.getConnection((err,) => {
   if (err) {
     console.error("MySQL connection failed:", err);
     console.error("Make sure MySQL is running on port 3306");
     console.error("You can start MySQL using: net start MySQL");
   } else {
     console.log("MySQL connected successfully!");
+  }
+});
+*/
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("MySQL connection failed:", err.message);
+  } else {
+    console.log("MySQL connected successfully to Aiven Cloud!");
+    connection.release();
+    createTables();
   }
 });
 
@@ -119,7 +144,7 @@ const createTables = () => {
   // Trigger running queries sequentially
   runQuery(0);
 };
-
+/*
 const createViews = () => {
   console.log("Creating database views...");
 };
@@ -135,5 +160,5 @@ setTimeout(() => {
     console.error("Error during table creation:", error);
   }
 }, 1500);
-
+*/
 export default db;

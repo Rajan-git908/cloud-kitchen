@@ -4,9 +4,12 @@ import { motion } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import "./AuthForms.css";
 
+const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,}){1,3}$/;
+const PHONE_REGEX = /^(98|97)\d{8}$/;
+/*
 const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,})$/;
 const PHONE_REGEX = /^(98|97)\d{8}$/;
-
+*/
 export default function Register() {
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -75,7 +78,7 @@ export default function Register() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.3 }}
+        
       >
         <motion.h2 
           className="auth-title"

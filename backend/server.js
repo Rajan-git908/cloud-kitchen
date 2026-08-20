@@ -34,12 +34,14 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json());
 
+
 // CORS Configuration
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ].filter(Boolean);
+
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -56,14 +58,14 @@ app.use(cors({
 // Rate Limiter for Auth Routes (Prevents Brute-Force attacks)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 auth requests per windowMs
+  max: 20, // Limit each IP to 20 auth requests per windowMs
   message: { message: "Too many login/register attempts. Please try again later." }
 });
 
 // General Rate Limiter for API
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000, // Increased limit for normal API usage
+  max: 100,// Increased limit for normal API usage
 });
 
 // 2. STATIC FILES
@@ -98,4 +100,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on ${PORT}`));

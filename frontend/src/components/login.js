@@ -35,7 +35,7 @@ export default function Login() {
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.error || (err.code === "ERR_NETWORK"
-        ? "Cannot reach the server. Start the backend on port 5002 and try again."
+        ? "Cannot reach the server. Start the backend on port 5000 and try again."
         : err?.message || "Login failed. Check credentials."));
     }
   };
