@@ -59,6 +59,7 @@ app.use(cors({
 // backend/server.js
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  "https://rajancloudkitchen.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173"
 ].filter(Boolean);

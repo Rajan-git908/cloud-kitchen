@@ -67,7 +67,7 @@ function Cart({ onPlaceOrder, tableMode = false }) {
                   <h3>{item.name}</h3>
                   {item.image_url ? (
                     <img 
-                      src={`${process.env.REACT_APP_API_BASE_URL || "http://localhost:5002"}${item.image_url}`} 
+                      src={`${process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com"}${item.image_url}`} 
                       alt="" 
                     />
                   ) : (

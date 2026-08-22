@@ -12,7 +12,7 @@ function Menu() {
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const { addToCart } = useContext(CartContext);
-  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:5002";
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com";
   
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
@@ -25,7 +25,7 @@ function Menu() {
   useEffect(() => {
     axios.get(`${apiBaseUrl}/api/menu`)
       .then((res) => setMenu(res.data))
-      .catch(() => setError("We could not connect to the menu service. Check that the backend is running on port 5000."))
+      .catch(() => setError("We could not connect to the menu service. Check that the backend is running."))
       .finally(() => setLoading(false));
   }, [apiBaseUrl]);
 
