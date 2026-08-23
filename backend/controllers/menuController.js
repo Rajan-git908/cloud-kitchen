@@ -1,24 +1,6 @@
 import db from "../models/db.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
-const imageDirectory = path.resolve(currentDirectory, "../images");
 
 const categories = ["Main Meals", "Fast Food & Snacks", "Healthy & Diet", "Desserts & Bakery", "Beverages"];
-
-// Helper function to safely delete image from disk
-const deleteImageFile = (imageUrl) => {
-  if (!imageUrl) return;
-  const fileName = imageUrl.replace("/images/", "");
-  const filePath = path.join(imageDirectory, fileName);
-  fs.unlink(filePath, (err) => {
-    if (err && err.code !== "ENOENT") {
-      console.error("Failed to delete old image file:", err);
-    }
-  });
-};
 
 const findCategoryId = (category, callback) => {
   const categoryName = category || "Main Meals";
@@ -43,7 +25,9 @@ export const addMenuItem = (req, res) => {
   if (!name || !price) {
     return res.status(400).json({ error: "Name and price are required" });
   }
-  const imageUrl = req.file ? `/images/${req.file.filename}` : null;
+  
+  // Cloudinary returns the permanent HTTPS image URL directly in req.file.path
+  const imageUrl = req.file ? req.file.path : null;
 
   findCategoryId(category, (categoryError, categoryId, validationError) => {
     if (validationError) return res.status(400).json({ error: validationError });
@@ -77,7 +61,6 @@ export const getMenu = (req, res) => {
   );
 };
 
-
 export const getAdminMenu = (req, res) => {
   db.query(
     `SELECT m.*, COALESCE(c.name, 'Main Meals') AS category
@@ -110,68 +93,43 @@ export const getCategories = (req, res) => {
 export const updateMenuItem = (req, res) => {
   const { id } = req.params;
   const { name, price, description, category } = req.body;
-  const newImageUrl = req.file ? `/images/${req.file.filename}` : null;
+  const newImageUrl = req.file ? req.file.path : null;
 
   if (!name || !price) {
     return res.status(400).json({ error: "Name and price are required" });
   }
 
-  // Retrieve current image so it can be deleted if a new one is uploaded
-  db.query("SELECT image_url FROM menu WHERE id = ?", [id], (fetchErr, results) => {
-    if (fetchErr) return res.status(500).json({ error: "Failed to fetch menu item" });
-    if (!results.length) return res.status(404).json({ error: "Menu item not found" });
+  findCategoryId(category, (categoryError, categoryId, validationError) => {
+    if (validationError) return res.status(400).json({ error: validationError });
+    if (categoryError) return res.status(500).json({ error: "category lookup error" });
 
-    const oldImageUrl = results[0].image_url;
+    const fields = ["name = ?", "price = ?", "description = ?", "category_id = ?"];
+    const values = [name, price, description || "", categoryId];
 
-    findCategoryId(category, (categoryError, categoryId, validationError) => {
-      if (validationError) return res.status(400).json({ error: validationError });
-      if (categoryError) return res.status(500).json({ error: "category lookup error" });
+    if (newImageUrl) {
+      fields.push("image_url = ?");
+      values.push(newImageUrl);
+    }
 
-      const fields = ["name = ?", "price = ?", "description = ?", "category_id = ?"];
-      const values = [name, price, description || "", categoryId];
+    values.push(id);
 
-      if (newImageUrl) {
-        fields.push("image_url = ?");
-        values.push(newImageUrl);
+    db.query(`UPDATE menu SET ${fields.join(", ")} WHERE id = ?`, values, (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "menu item update error" });
       }
-
-      values.push(id);
-
-      db.query(`UPDATE menu SET ${fields.join(", ")} WHERE id = ?`, values, (err) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: "menu item update error" });
-        }
-
-        // Remove old image file from disk when replaced with a new upload
-        if (newImageUrl && oldImageUrl) {
-          deleteImageFile(oldImageUrl);
-        }
-
-        res.json({ message: "Menu item updated successfully" });
-      });
+      res.json({ message: "Menu item updated successfully" });
     });
   });
 };
 
 export const deleteMenuItem = (req, res) => {
   const { id } = req.params;
-
-  db.query("SELECT image_url FROM menu WHERE id = ?", [id], (fetchErr, results) => {
-    if (fetchErr) return res.status(500).json({ error: "Failed to fetch menu item" });
-    const imageUrl = results[0]?.image_url;
-
-    db.query("DELETE FROM menu WHERE id = ?", [id], (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "menu item deletion error" });
-      }
-
-      if (imageUrl) {
-        deleteImageFile(imageUrl);
-      }
-
-      res.json({ message: "Menu item deleted successfully" });
-    });
+  db.query("DELETE FROM menu WHERE id = ?", [id], (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "menu item deletion error" });
+    }
+    res.json({ message: "Menu item deleted successfully" });
   });
 };

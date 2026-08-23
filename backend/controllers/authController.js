@@ -7,6 +7,7 @@ const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,}){1,3}$/;
 const PHONE_REGEX = /^(98|97)\d{8}$/;
 
 export const registerUser = (req, res) => {
+  try {
   const { full_name, phone, location, password } = req.body || {};
 
   if (!full_name || !phone || !location || !password) {
@@ -24,11 +25,11 @@ export const registerUser = (req, res) => {
   db.query("SELECT id FROM users WHERE phone = ?", [phone], (selectErr, existing) => {
     if (selectErr) {
       console.error(selectErr);
-      return res.status(500).json({ error: "Database error" });
+      return res.status(500).json({ error: "Database error during user check" });
     }
 
     if (existing.length > 0) {
-      return res.status(409).json({ error: "Phone already registered" });
+      return res.status(409).json({ error: "user already exists with this phone number" });
     }
 
     const hashed = bcrypt.hashSync(password, 10);
@@ -38,13 +39,16 @@ export const registerUser = (req, res) => {
       (err) => {
         if (err) {
           console.error(err);
-          return res.status(500).json({ error: "Database error" });
+          return res.status(500).json({ error: "Database error during registration" });
         }
         res.json({ message: "User registered successfully" });
       }
     );
   });
-};
+}catch(err){
+  console.error("unhandled error in registerUser:", err);
+  return res.status(500).json({ error: "Internal server error" });
+}};
 
 export const loginUser = (req, res) => {
   const { phone, password } = req.body || {};
@@ -207,8 +211,5 @@ export const resetPassword = (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  // For JWT-based auth, logout is primarily handled on the client side
-  // by removing the token. This endpoint can be extended for session management
-  // or token blacklisting in the future.
   res.json({ message: "Logged out successfully" });
 };

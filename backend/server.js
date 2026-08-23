@@ -94,7 +94,7 @@ const apiLimiter = rateLimit({
 });
 
 // 2. STATIC FILES
-app.use("/images", express.static(imageDirectory));
+//app.use("/images", express.static(imageDirectory));
 
 // 3. API ROUTES
 app.use("/api/auth", authLimiter, authRoutes);
