@@ -84,7 +84,7 @@ const createTables = () => {
   description TEXT,
   category_id INT NULL,
   is_available TINYINT(1) NOT NULL DEFAULT 1,
-  image_url VARCHAR(255),
+  image_url VARCHAR(1000),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES food_categories(id) 
     ON UPDATE CASCADE ON DELETE SET NULL
@@ -144,21 +144,5 @@ const createTables = () => {
   // Trigger running queries sequentially
   runQuery(0);
 };
-/*
-const createViews = () => {
-  console.log("Creating database views...");
-};
 
-// Delay table creation to ensure connection is established
-setTimeout(() => {
-  console.log(" Checking database connection status...");
-  console.log(`Database state: ${db.state}`);
-
-  try {
-    createTables();
-  } catch (error) {
-    console.error("Error during table creation:", error);
-  }
-}, 1500);
-*/
 export default db;

@@ -10,45 +10,54 @@ function Reviews() {
   const [text, setText] = useState("");
   const [rating, setRating] = useState(5);
   const [message, setMessage] = useState("");
-  
-  const loadReviews = () => 
-    axios.get(`${apiBaseUrl}/api/reviews`)
+
+  const loadReviews = () =>
+    axios
+      .get(`${apiBaseUrl}/api/reviews`)
       .then((res) => setReviews(res.data))
       .catch(() => setReviews([]));
-  
-  useEffect(() => { 
-    axios.get(`${apiBaseUrl}/api/reviews`)
+
+  useEffect(() => {
+    axios
+      .get(`${apiBaseUrl}/api/reviews`)
       .then((res) => setReviews(res.data))
-      .catch(() => setReviews([])); 
+      .catch(() => setReviews([]));
   }, [apiBaseUrl]);
-  
+
   const submitReview = async (event) => {
     event.preventDefault();
-    try { 
-      await axios.post(`${apiBaseUrl}/api/reviews`, { 
-        name: user.name || user.full_name,
-        text, 
-        rating 
-      }, { 
-        headers: { Authorization: `Bearer ${token}` } 
-      }); 
-      setText(""); 
-      setMessage("Thanks for sharing your experience."); 
-      loadReviews(); 
-    } catch (error) { 
-      setMessage(error.response?.data?.error || "Unable to submit review."); 
+    try {
+      await axios.post(
+        `${apiBaseUrl}/api/reviews`,
+        {
+          name: user.name || user.full_name,
+          text,
+          rating,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setText("");
+      setMessage("Thanks for sharing your experience.");
+      loadReviews();
+    } catch (error) {
+      setMessage(error.response?.data?.error || "Unable to submit review.");
     }
   };
-  
+
+  // Duplicate items so the animation seamlessly wraps around
+  const duplicatedReviews = [...reviews, ...reviews];
+
   return (
-    <motion.section 
+    <motion.section
       className="testimonials"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
     >
-      <motion.div 
+      <motion.div
         className="section-heading"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -58,33 +67,33 @@ function Reviews() {
         <div>
           <span className="eyebrow">Kind words</span>
           <h2>What our customers say.</h2>
-          <p className="section-subtitle">Your table is part of the story. Tell us how dinner went.</p>
+          <p className="section-subtitle">
+            Your table is part of the story. Tell us how dinner went.
+          </p>
         </div>
       </motion.div>
-      
-      <div className="review-grid">
-        {reviews.map((review, index) => (
-          <motion.article 
-            className="review-card" 
-            key={review.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ y: -8 }}
-          >
-            <h5>{review.name}</h5>
-            <div className="stars" aria-label={`${review.rating} out of 5 stars`}>
-              {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
-            </div>
-            <p>“{review.text}”</p>
-            
-          </motion.article>
-        ))}
+
+      {/* Infinite Right-to-Left Ticker Container */}
+      <div className="slider-container">
+        <div className="slider-track">
+          {duplicatedReviews.map((review, index) => (
+            <article className="review-card slide-card" key={`${review.id}-${index}`}>
+              <h5>{review.name}</h5>
+              <div
+                className="stars"
+                aria-label={`${review.rating} out of 5 stars`}
+              >
+                {"★".repeat(review.rating)}
+                {"☆".repeat(5 - review.rating)}
+              </div>
+              <p>“{review.text}”</p>
+            </article>
+          ))}
+        </div>
       </div>
-      
+
       {user ? (
-        <motion.form 
+        <motion.form
           className="review-form"
           onSubmit={submitReview}
           initial={{ opacity: 0, y: 20 }}
@@ -92,18 +101,18 @@ function Reviews() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <textarea 
-            className="form-control" 
-            value={text} 
-            onChange={(event) => setText(event.target.value)} 
-            placeholder="Tell us about your order" 
-            required 
+          <textarea
+            className="form-control"
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            placeholder="Tell us about your order"
+            required
             rows="3"
           />
-          <select 
-            className="form-control" 
-            value={rating} 
-            onChange={(event) => setRating(Number(event.target.value))} 
+          <select
+            className="form-control"
+            value={rating}
+            onChange={(event) => setRating(Number(event.target.value))}
             aria-label="Rating"
           >
             <option value="5">5 stars</option>
@@ -112,8 +121,8 @@ function Reviews() {
             <option value="2">2 stars</option>
             <option value="1">1 star</option>
           </select>
-          <motion.button 
-            className="button-primary" 
+          <motion.button
+            className="button-primary"
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -123,7 +132,7 @@ function Reviews() {
           {message && <small>{message}</small>}
         </motion.form>
       ) : (
-        <motion.div 
+        <motion.div
           className="review-invite"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -131,12 +140,17 @@ function Reviews() {
           transition={{ duration: 0.6 }}
         >
           <strong>Enjoyed your order?</strong>
-          <span>Sign in to leave a rating and help the next customer choose.</span>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link to="/login" className="button-secondary"  style={{ textDecoration: "none" }}>Share your experience</Link>
+          <span>
+            Sign in to leave a rating and help the next customer choose.
+          </span>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              to="/login"
+              className="button-secondary"
+              style={{ textDecoration: "none" }}
+            >
+              Share your experience
+            </Link>
           </motion.div>
         </motion.div>
       )}

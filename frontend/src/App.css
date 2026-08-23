@@ -2651,3 +2651,41 @@ background: linear-gradient(90deg, rgba(255, 255, 255, 0.647), rgba(68, 69, 69, 
     animation-duration: .01ms !important;
   }
 }
+
+/* Slider Infinite Animation */
+.slider-container {
+  overflow: hidden;
+  width: 100%;
+  padding: var(--space-md) 0;
+  position: relative;
+}
+
+/* Linear infinite track */
+.slider-track {
+  display: flex;
+  gap: var(--space-lg);
+  width: max-content;
+  animation: slideLeft 25s linear infinite;
+}
+
+/* Pause animation on hover */
+.slider-container:hover .slider-track {
+  animation-play-state: paused;
+}
+
+/* Individual card sizing inside slider */
+.slide-card {
+  width: 320px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* Keyframes for sliding right-to-left */
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

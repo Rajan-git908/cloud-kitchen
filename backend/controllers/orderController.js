@@ -1,23 +1,6 @@
 //order controller
 import db from "../models/db.js";
 
-/*
-export const fetchOrders = (req, res) => {
-  const userId = req.user?.id || req.userId;
-  
-  db.query(
-    `SELECT o.id, o.user_id, o.total, o.status, o.created_at
-     FROM orders o 
-     WHERE o.user_id = ? 
-     ORDER BY o.created_at DESC`,
-    [userId],
-    (err, results) => {
-      if (err) return res.status(500).json({ error: err.message || "Database error" });
-      res.json(results);
-    }
-  );
-};
-*/
 // orderController.js
 export const fetchOrders = (req, res) => {
   const userId = req.user?.id || req.userId;
