@@ -4,6 +4,17 @@ import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
+
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com";
+  
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (/^https?:\/\//i.test(imagePath)) return imagePath;
+    const normalizedPath = imagePath.replace(/\\/g, "/");
+    const imageName = normalizedPath.split("/").pop();
+    return `${apiBaseUrl.replace(/\/$/, "")}/images/${encodeURIComponent(imageName)}`;
+  };
+
 function Cart({ onPlaceOrder, tableMode = false }) {
   const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
   const { token } = useContext(AuthContext);
@@ -65,14 +76,20 @@ function Cart({ onPlaceOrder, tableMode = false }) {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
                   <h3>{item.name}</h3>
-                  {item.image_url ? (
-                    <img 
-                      src={`${process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com"}${item.image_url}`} 
-                      alt="" 
-                    />
-                  ) : (
-                    <div className="cart-thumb">🍽️</div>
-                  )}
+                    {item.image_url ? (
+              <img 
+                src={getImageUrl(item.image_url)} 
+                alt={item.name} 
+                onError={(event) => { 
+                  event.currentTarget.replaceWith(Object.assign(document.createElement("div"), { 
+                    className: "menu-image-placeholder", 
+                    textContent: "🍽️" 
+                  })); 
+                }} 
+              />
+            ) : (
+              <div className="menu-image-placeholder">🍽️</div>
+            )}
                   <div className="cart-item-info">
                     
                     <p>Rs. {item.price} each</p>
