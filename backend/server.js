@@ -23,10 +23,13 @@ import orderItemRoutes from "./routes/orderItemRoutes.js";
 dotenv.config();
 
 const app = express();
-const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
-const imageDirectory = path.resolve(currentDirectory, "images");
 
-// 1. SECURITY & UTILITY MIDDLEWARES (Must come FIRST)
+// Trust proxy for Render / Cloudflare reverse proxies
+app.set("trust proxy", 1);
+
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+
+// 1. SECURITY & UTILITY MIDDLEWARES
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
@@ -34,29 +37,7 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json());
 
-/*
 // CORS Configuration
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-].filter(Boolean);
-
-
-app.use(cors({
-  origin: (origin, callback) => {
-    const isLocalDevelopmentOrigin = origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-    if (!origin || allowedOrigins.includes(origin) || isLocalDevelopmentOrigin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
-*/
-
-// backend/server.js
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "https://rajancloudkitchen.vercel.app",
@@ -67,36 +48,28 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, or Render health checks)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      // Return false instead of throwing a new Error() to avoid crashing Node
       return callback(null, false);
     },
     credentials: true,
   })
 );
 
-
-
-// Rate Limiter for Auth Routes (Prevents Brute-Force attacks)
+// Rate Limiters
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 auth requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: { message: "Too many login/register attempts. Please try again later." }
 });
 
-// General Rate Limiter for API
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,// Increased limit for normal API usage
+  max: 100,
 });
 
-// 2. STATIC FILES
-//app.use("/images", express.static(imageDirectory));
-
-// 3. API ROUTES
+// 2. API ROUTES
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/menu", apiLimiter, menuRoutes);
 app.use("/api/categories", apiLimiter, categoryRoutes);
@@ -111,12 +84,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend server running successfully!" });
 });
 
-// 4. 404 HANDLER
+// 3. 404 HANDLER
 app.use((req, res) => {
   res.status(404).json({ message: "Endpoint not found" });
 });
 
-// 5. GLOBAL ERROR HANDLER
+// 4. GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error("Unhandled Server Error:", err.stack);
   res.status(500).json({ 
