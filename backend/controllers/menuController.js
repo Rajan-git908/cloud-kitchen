@@ -26,20 +26,19 @@ export const addMenuItem = (req, res) => {
     return res.status(400).json({ error: "Name and price are required" });
   }
   
-  // Cloudinary returns the permanent HTTPS image URL directly in req.file.path
   const imageUrl = req.file ? req.file.path : null;
 
   findCategoryId(category, (categoryError, categoryId, validationError) => {
     if (validationError) return res.status(400).json({ error: validationError });
-    if (categoryError) return res.status(500).json({ error: "Category error" });
+    if (categoryError) return res.status(500).json({ error: categoryError.message || "Category error" });
 
     db.query(
       "INSERT INTO menu (name, price, description, category_id, image_url) VALUES (?, ?, ?, ?, ?)",
       [name, price, description || "", categoryId, imageUrl],
       (err) => {
         if (err) {
-          console.error(err);
-          return res.status(500).json({ error: "Item insertion error" });
+          console.error("SQL Error in addMenuItem:", err);
+          return res.status(500).json({ error: err.sqlMessage || err.message || "Item insertion error" });
         }
         res.json({ message: "Menu item added successfully" });
       }
@@ -55,7 +54,7 @@ export const getMenu = (req, res) => {
      WHERE m.is_available = 1
      ORDER BY m.id DESC`,
     (err, results) => {
-      if (err) return res.status(500).json({ error: "menu fetch error" });
+      if (err) return res.status(500).json({ error: err.sqlMessage || "menu fetch error" });
       res.json(results);
     }
   );
@@ -68,7 +67,7 @@ export const getAdminMenu = (req, res) => {
      LEFT JOIN food_categories c ON c.id = m.category_id
      ORDER BY m.id DESC`,
     (err, results) => {
-      if (err) return res.status(500).json({ error: "admin menu fetch error" });
+      if (err) return res.status(500).json({ error: err.sqlMessage || "admin menu fetch error" });
       res.json(results);
     }
   );
@@ -78,14 +77,14 @@ export const toggleMenuAvailability = (req, res) => {
   const { id } = req.params;
   const { is_available } = req.body || {};
   db.query("UPDATE menu SET is_available = ? WHERE id = ?", [Boolean(is_available), id], (err) => {
-    if (err) return res.status(500).json({ error: "Availability update error" });
+    if (err) return res.status(500).json({ error: err.sqlMessage || "Availability update error" });
     res.json({ message: `Menu item ${is_available ? "shown" : "hidden"}` });
   });
 };
 
 export const getCategories = (req, res) => {
   db.query("SELECT id, name FROM food_categories ORDER BY id", (err, results) => {
-    if (err) return res.status(500).json({ error: "categories fetch error" });
+    if (err) return res.status(500).json({ error: err.sqlMessage || "categories fetch error" });
     res.json(results);
   });
 };
@@ -101,7 +100,7 @@ export const updateMenuItem = (req, res) => {
 
   findCategoryId(category, (categoryError, categoryId, validationError) => {
     if (validationError) return res.status(400).json({ error: validationError });
-    if (categoryError) return res.status(500).json({ error: "category lookup error" });
+    if (categoryError) return res.status(500).json({ error: categoryError.message || "category lookup error" });
 
     const fields = ["name = ?", "price = ?", "description = ?", "category_id = ?"];
     const values = [name, price, description || "", categoryId];
@@ -115,8 +114,8 @@ export const updateMenuItem = (req, res) => {
 
     db.query(`UPDATE menu SET ${fields.join(", ")} WHERE id = ?`, values, (err) => {
       if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "menu item update error" });
+        console.error("SQL Error in updateMenuItem:", err);
+        return res.status(500).json({ error: err.sqlMessage || err.message || "menu item update error" });
       }
       res.json({ message: "Menu item updated successfully" });
     });
@@ -127,8 +126,8 @@ export const deleteMenuItem = (req, res) => {
   const { id } = req.params;
   db.query("DELETE FROM menu WHERE id = ?", [id], (err) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "menu item deletion error" });
+      console.error("SQL Error in deleteMenuItem:", err);
+      return res.status(500).json({ error: err.sqlMessage || err.message || "menu item deletion error" });
     }
     res.json({ message: "Menu item deleted successfully" });
   });

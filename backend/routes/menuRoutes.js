@@ -7,7 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 */
-import {upload} from "../config/cloudinary.js";
+import {upload} from "../models/cloudinary.js";
 import { addMenuItem, getMenu, getAdminMenu, getCategories, updateMenuItem, toggleMenuAvailability, deleteMenuItem } from "../controllers/menuController.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
