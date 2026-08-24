@@ -36,7 +36,7 @@ export default function UserDashboard() {
 
         if (statusChanged) {
           setOrders(updatedOrders);
-          setMessage("🔄 Order status updated! Check your orders below.");
+          setMessage(" Order status updated! Check your orders below.");
           setTimeout(() => setMessage(""), 5000);
         }
       } catch (err) {
@@ -59,16 +59,7 @@ export default function UserDashboard() {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Pending': return '⏳';
-      case 'Preparing': return '👨‍🍳';
-      case 'Out for Delivery': return '🚚';
-      case 'Completed': return '✅';
-      case 'Cancelled': return '❌';
-      default: return '📦';
-    }
-  };
+  
 
   const parseItems = (items) => {
     if (Array.isArray(items)) return items;
@@ -148,7 +139,7 @@ export default function UserDashboard() {
                     </td>
                     <td>
                       <span className={`status-badge ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)} {order.status}
+                         {order.status}
                       </span>
                     </td>
                     <td>Rs. {Number(order.total) + 150}</td>

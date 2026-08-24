@@ -1,8 +1,8 @@
 .auth-shell {
   align-items: center;
   background: 
-    linear-gradient(135deg, rgba(24, 63, 54, 0.05) 0%, rgba(217, 237, 104, 0.08) 50%, rgba(238, 118, 94, 0.05) 100%),
-    url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1920&q=80") center/cover no-repeat fixed;
+    linear-gradient(135deg, rgba(19, 239, 45, 0.568) 0%, rgba(205, 238, 18, 0) 50%, rgba(228, 53, 18, 0.289) 100%),
+    url("../Image/cover_image.avif") center/cover no-repeat fixed;
   display: flex;
   justify-content: center;
   min-height: calc(100vh - 78px);
@@ -15,23 +15,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(245, 241, 232, 0.85) 0%, rgba(245, 241, 232, 0.95) 100%);
+  background: linear-gradient(180deg, rgba(245, 210, 130, 0.251) 0%, rgba(245, 241, 232, 0.644) 100%);
   backdrop-filter: blur(8px);
   z-index: 0;
 }
 
-.auth-shell::after {
-  border: 1px solid rgba(24, 63, 54, .12);
-  border-radius: 50%;
-  content: "";
-  height: 420px;
-  position: absolute;
-  right: -170px;
-  top: 8%;
-  width: 420px;
-  animation: float 20s ease-in-out infinite;
-  z-index: 0;
-}
 
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -333,7 +321,7 @@
   justify-content: center;
   background: 
     linear-gradient(135deg, rgba(24, 63, 54, 0.05) 0%, rgba(217, 237, 104, 0.08) 50%, rgba(238, 118, 94, 0.05) 100%),
-    url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1920&q=80") center/cover no-repeat fixed;
+    url("../Image/cover_image.avif") center/cover no-repeat fixed;
   position: relative;
   overflow: hidden;
   padding: 72px 20px;

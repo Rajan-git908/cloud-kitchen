@@ -56,11 +56,11 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
                         value={order.status} 
                         onChange={(e) => updateStatus(order.id, e.target.value)}
                       >
-                        <option value="Pending">⏳ Pending</option>
-                        <option value="Preparing">👨‍🍳 Preparing</option>
-                        <option value="Out for Delivery">🚚 Out for Delivery</option>
-                        <option value="Completed">✅ Completed</option>
-                        <option value="Cancelled">❌ Cancelled</option>
+                        <option value="Pending"> Pending</option>
+                        <option value="Preparing"> Preparing</option>
+                        <option value="Out for Delivery"> Out for Delivery</option>
+                        <option value="Completed"> Completed</option>
+                        <option value="Cancelled">Cancelled</option>
                       </select>
                     </td>
                   </tr>

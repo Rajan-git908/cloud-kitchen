@@ -109,16 +109,12 @@ a {
 }
 
 .container {
+  max-width: 1280px;
   margin: 0 auto;
-  max-width: 1240px;
-  padding-left: clamp(20px, 5vw, 74px);
-  padding-right: clamp(20px, 5vw, 74px);
+  padding: 0 var(--space-lg);
+
 }
 
-.container.py-4 {
-  padding-bottom: 74px;
-  padding-top: 74px;
-}
 
 /* Enhanced Typography */
 h1, h2, h3, h4, h5, h6 {
@@ -278,7 +274,7 @@ background: rgba(236, 245, 178, 0.438);
   align-items: center;
   display: flex;
   font-family: "Times new roman", serif;
-  font-weight: 900;
+  font-weight: 700;
   gap: var(--space-md);
   transition: color 0.3s ease;
 
@@ -882,10 +878,7 @@ background: rgba(236, 245, 178, 0.438);
 }
 
 /* Cart & Checkout Layout */
-.cart-page,
-.checkout-page {
-  padding-top: var(--space-2xl);
-}
+
 
 .cart-page h1,
 .checkout-page h1 {
