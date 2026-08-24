@@ -130,8 +130,7 @@ function Home() {
           <h2>Made close to home, meant to be shared.</h2>
           <p>Cloud Kitchen is a small, focused kitchen built around generous food and dependable delivery. We choose ingredients with care, cook in small batches, and keep the menu lively without making dinner complicated.</p>
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+           
           >
             <Link to="/menu" className="button-secondary" style={{ textDecoration: "none" }}>Meet the menu</Link>
           </motion.div>

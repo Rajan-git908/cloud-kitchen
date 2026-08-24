@@ -266,31 +266,22 @@ small { font-size: var(--text-sm); }
 }
 
 /* Navbar */
-.navbar {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  justify-content: space-between;
-  min-height: 80px;
-  padding: var(--space-md) clamp(var(--space-lg), 5vw, var(--space-2xl));
-  position: sticky;
-  top: 0;
+.navbar{
+background: rgba(236, 245, 178, 0.438);
+  border-bottom: 2px solid var(--ink-light);
+ box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   z-index: 100;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding:0.5rem;
 }
 
 .navbar-brand {
   align-items: center;
-  color: var(--ink);
   display: flex;
-  font-family: "Playfair Display", serif;
-  font-size: var(--text-xl);
-  font-weight: 700;
+  font-family: "Times new roman", serif;
+  font-weight: 900;
   gap: var(--space-md);
-  text-decoration: none;
   transition: color 0.3s ease;
+
 }
 
 .navbar-brand:hover {
@@ -299,16 +290,19 @@ small { font-size: var(--text-sm); }
 
 .brand-logo {
   border-radius: 50%;
-  height: 48px;
+  height: 80px;
   object-fit: cover;
-  width: 48px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 80px;
+  box-shadow: 0 4px 12px rgba(0 0 0 /53%);
 }
 
 .nav-links {
   align-items: center;
+  justify-items: center;
   display: flex;
-  gap: var(--space-sm);
+  font-size: large;
+  font-weight: 600;
+  gap: 50px;
 }
 
 .mobile-menu-toggle {
@@ -436,61 +430,62 @@ small { font-size: var(--text-sm); }
   border-radius: var(--radius-md);
 }
 
+
+
 .page-wrap,
 .menu-container,
-.testimonials {
-  margin: 0 auto;
+.review-card {
   max-width: 1280px;
-  padding: var(--space-3xl) clamp(var(--space-lg), 5vw, var(--space-2xl));
+  padding: 20px 10px 10px 10px;
 }
 
 /* Hero Section */
-.hero {
+.hero,
+.kitchen-story-image {
   align-items: center;
-  background: linear-gradient(135deg, rgba(250, 59, 75, 0.612), rgba(15, 242, 216, 0.514)),
-    url("Image/cover_image.avif") center/cover;
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   color: white;
   display: grid;
   gap: var(--space-2xl);
-  grid-template-columns: 1fr 1fr;
   min-height: min(700px, calc(100vh - 80px));
   overflow: hidden;
   padding: clamp(var(--space-2xl), 8vw, var(--space-3xl)) clamp(var(--space-lg), 5vw, var(--space-2xl));
   position: relative;
   margin-bottom: var(--space-3xl);
 }
+.hero{
+ background: linear-gradient(135deg, rgba(250, 59, 75, 0.612), rgba(15, 242, 216, 0.514)),
+    url("Image/cover_image.avif") center/cover;
+}
+.kitchen-story-image{
+  background: linear-gradient(135deg, rgba(116, 150, 243, 0.349), rgba(15, 174, 242, 0.344)),
+    url("Image/kitchen_frame.jpeg") center/cover;
+  border-radius: var(--radius-lg);
+}
 
-.hero::before {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent 60%);
+
+.hero::before,
+.kitchen-story-image::before {
+  background: linear-gradient(90deg, rgba(14, 1, 1, 0.725), transparent 60%);
   content: "";
   inset: 0;
   position: absolute;
 }
 
-.hero::after {
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  content: "";
-  height: 600px;
-  position: absolute;
-  right: -150px;
-  top: -200px;
-  width: 600px;
-  animation: float 25s ease-in-out infinite;
-}
 
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-30px) rotate(180deg); }
 }
 
-.hero > * {
+.hero,
+.kitchen-story-image > * {
   position: relative;
   z-index: 1;
 }
 
-.hero h1 {
+.hero h1,
+.kitchen-story-copy h2 {
   font-family: "Playfair Display", serif;
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 700;
@@ -501,7 +496,8 @@ small { font-size: var(--text-sm); }
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
 }
 
-.hero p {
+.hero p,
+.kitchen-story-copy p {
   color: rgba(255, 255, 255, 0.9);
   font-size: var(--text-lg);
   line-height: 1.8;
@@ -570,7 +566,7 @@ small { font-size: var(--text-sm); }
   align-items: flex-end;
   display: flex;
   justify-content: space-between;
-  margin: var(--space-xl) 0 var(--space-2xl);
+  margin:0px;
   flex-wrap: wrap;
   gap: var(--space-lg);
 }
@@ -702,14 +698,14 @@ small { font-size: var(--text-sm); }
   box-shadow: 0 8px 25px rgba(230, 57, 70, 0.4);
 }
 
-.testimonials {
-  padding-top: var(--space-2xl);
-  margin-bottom: var(--space-3xl);
+.reviews {
+  margin:0px 10px 10px 10px;
 }
 
 .review-card {
-  padding: var(--space-xl);
+  padding: 10px;
   background: linear-gradient(135deg, var(--paper), var(--cream-dark));
+  border-radius: var(--radius-lg);
 }
 
 .review-card .stars {
@@ -774,7 +770,9 @@ small { font-size: var(--text-sm); }
 }
 
 /* Feature Cards */
-.home-intro { padding-bottom: 44px; }
+.home-intro {padding: 0px 0px 20px 0px; 
+  margin: auto;
+}
 
 .feature-grid {
   display: grid;
@@ -850,62 +848,12 @@ small { font-size: var(--text-sm); }
   z-index: 1;
 }
 
-/* Kitchen Story */
-.kitchen-story {
-  background: var(--sage);
-  color: #fff;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2xl);
-  align-items: center;
-  margin: var(--space-3xl) auto;
-  padding: var(--space-3xl) 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  max-width: 1240px;
-  min-height: 440px;
-}
-
-.kitchen-story-image {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.647), rgba(68, 69, 69, 0.825)), url("Image/kitchen_frame.jpeg") center/cover;
-  border-radius: var(--radius-lg);
-  aspect-ratio: 4/3;
-  position: relative;
-  overflow: hidden;
-  min-height: 360px;
-}
-
-.kitchen-story-copy {
-  align-self: center;
-  padding: clamp(36px, 7vw, 84px);
-  max-width: 520px;
-}
-
-.kitchen-story-copy .eyebrow {
-  color: var(--lime);
-  font-weight: 1000;
-}
-
-.kitchen-story-copy h2 {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(2.2rem, 4vw, 4rem);
-  line-height: 1;
-  margin: 12px 0 20px;
-}
-
-.kitchen-story-copy p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: .95rem;
-  line-height: 1.5;
-  margin-bottom: 28px;
-}
-
 /* Category Filters */
 .category-filters {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-sm);
-  margin-bottom: var(--space-xl);
+  margin: var(--space-xl) 0px var(--space-xl) 0;
   justify-content: center;
 }
 
@@ -2105,18 +2053,10 @@ small { font-size: var(--text-sm); }
 
   .feature-card-dark { transform: none; }
 
-  .kitchen-story-image { min-height: 280px; }
-
   .cart-summary { position: static; }
 
   .cart-item-total { font-size: .82rem; }
 
-  .page-wrap,
-  .menu-container,
-  .testimonials {
-    padding-bottom: 54px;
-    padding-top: 54px;
-  }
 
   .footer {
     flex-direction: column;

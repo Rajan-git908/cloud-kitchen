@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CartContext } from "../context/CartContext";
 import "../App.css";
 
@@ -12,8 +12,17 @@ function Menu() {
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const { addToCart } = useContext(CartContext);
+const [addedMessage,setAddedMessage] =useState(false);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "https://cloud-kitchen-l1m5.onrender.com";
   
+const handleAddToCart=(item)=>{
+  addToCart(item);
+  setAddedMessage(true);
+  setTimeout(()=>{
+    setAddedMessage(false);
+  },2000);
+};
+
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
     if (/^https?:\/\//i.test(imagePath)) return imagePath;
@@ -146,13 +155,27 @@ function Menu() {
                 <span className="price">Rs. {item.price}</span>
                 <motion.button
                   className="btn"
-                  onClick={() => addToCart(item)}
+                  onClick={() => handleAddToCart(item)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Add
                 </motion.button>
+                <AnimatePresence>
+                {addedMessage &&(
+                  <motion.span
+                  className="added-message"
+                  initial={{opacity:0,y:-5}}
+                  animate={{opacity:1,y:0}}
+                  exit={{opacity:0}}
+                  >
+                  Food is Added...!
+                  </motion.span>
+                )}
+              </AnimatePresence>
               </div>
+
+              
             </div>
           </motion.div>
         ))}

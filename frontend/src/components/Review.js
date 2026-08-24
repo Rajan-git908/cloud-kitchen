@@ -51,7 +51,7 @@ function Reviews() {
 
   return (
     <motion.section
-      className="testimonials"
+      className="reviews"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
