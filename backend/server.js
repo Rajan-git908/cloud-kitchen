@@ -1,3 +1,4 @@
+//server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -19,6 +20,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import userManagementRoutes from "./routes/userManagementRoutes.js";
 import orderItemRoutes from "./routes/orderItemRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 
@@ -78,6 +80,7 @@ app.use("/api/order-items", apiLimiter, orderItemRoutes);
 app.use("/api/admin", apiLimiter, adminRoutes);
 app.use("/api/admin/users", apiLimiter, userManagementRoutes);
 app.use("/api/reviews", apiLimiter, reviewRoutes);
+app.use("/api/payment", apiLimiter, paymentRoutes);
 
 // Base route
 app.get("/", (req, res) => {
@@ -98,4 +101,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on ${PORT}`));

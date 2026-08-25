@@ -97,6 +97,7 @@ const createTables = () => {
   total DECIMAL(10,2) NOT NULL,
   status ENUM('Pending', 'Preparing', 'Out for Delivery', 'Completed', 'Cancelled') DEFAULT 'Pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  delivery_address VARCHAR(255) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )`,
 

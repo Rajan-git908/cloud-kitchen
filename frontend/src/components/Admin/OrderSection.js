@@ -25,9 +25,11 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
               <th>Items</th>
               <th>Phone Number</th>
               <th>Customer</th>
+              <th>Location</th>
               <th>Total</th>
               <th>Date</th>
               <th>Status</th>
+            
             </tr>
           </thead>
           <tbody>
@@ -48,6 +50,20 @@ export default function OrdersSection({ orders, updateStatus, getStatusColor }) 
                     </td>
                     <td>{order.user_phone}</td>
                     <td>{order.user_name}</td>
+                    <td>
+                      {order.latitude && order.longitude ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-sm btn-outline-secondary"
+                        >
+                           View Map
+                        </a>
+                      ) : (
+                        <span>{order.delivery_address || order.user_location || "N/A"}</span>
+                      )}
+                      </td>
                     <td>Rs.{Number(order.total) + 150}</td>
                     <td>{new Date(order.created_at).toLocaleDateString()}</td>
                     <td>
