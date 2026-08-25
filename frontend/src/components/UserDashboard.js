@@ -115,6 +115,7 @@ export default function UserDashboard() {
               <tr>
                 <th>Order ID</th>
                 <th>Items</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Total</th>
                 <th>Date</th>
@@ -137,6 +138,11 @@ export default function UserDashboard() {
                         {itemCount} {itemCount === 1 ? "item" : "items"}
                       </button>
                     </td>
+                    <td>
+  <span className="badge bg-light text-dark">{order.payment_method || 'COD'}</span>
+  <br />
+  <small className="text-muted">{order.payment_status || 'Pending'}</small>
+</td>
                     <td>
                       <span className={`status-badge ${getStatusColor(order.status)}`}>
                          {order.status}

@@ -76,7 +76,6 @@ export const verifyEsewaPayment = (req, res) => {
     const secretKey = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q";
 
     // 2. Build verification signature dynamically from signed_field_names
-    // eSewa return format: transaction_code=VALUE,status=VALUE,total_amount=VALUE,transaction_uuid=VALUE,product_code=VALUE,signed_field_names=VALUE
     const map = {
       transaction_code,
       status,
@@ -106,14 +105,25 @@ export const verifyEsewaPayment = (req, res) => {
 
     // 4. Update Database Order
     db.query(
-      "UPDATE orders SET status = 'Preparing' WHERE id = ?",
+      "UPDATE orders SET status = 'Preparing', payment_status = 'Completed' WHERE id = ?",
       [orderId],
       (err) => {
         if (err) {
           console.error("Database update error:", err);
           return res.status(500).json({ error: "Database update error" });
         }
-        res.json({ message: "Payment verified successfully", order_id: orderId });
+
+        // Also update payments tracking table safely
+        db.query(
+          "UPDATE payments SET status = 'Completed', transaction_code = ? WHERE order_id = ?",
+          [transaction_code, orderId],
+          (payErr) => {
+            if (payErr) {
+              console.error("Payment log update error:", payErr);
+            }
+            return res.json({ message: "Payment verified successfully", order_id: orderId });
+          }
+        );
       }
     );
   } catch (err) {

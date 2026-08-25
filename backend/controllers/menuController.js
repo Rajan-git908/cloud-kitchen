@@ -1,5 +1,5 @@
+//menuController.js
 import db from "../models/db.js";
-
 const categories = ["Main Meals", "Fast Food & Snacks", "Healthy & Diet", "Desserts & Bakery", "Beverages"];
 
 const findCategoryId = (category, callback) => {
@@ -32,19 +32,21 @@ export const addMenuItem = (req, res) => {
     if (validationError) return res.status(400).json({ error: validationError });
     if (categoryError) return res.status(500).json({ error: categoryError.message || "Category error" });
 
-    db.query(
-      "INSERT INTO menu (name, price, description, category_id, image_url) VALUES (?, ?, ?, ?, ?)",
-      [name, price, description || "", categoryId, imageUrl],
-      (err) => {
-        if (err) {
-          console.error("SQL Error in addMenuItem:", err);
-          return res.status(500).json({ error: err.sqlMessage || err.message || "Item insertion error" });
-        }
-        res.json({ message: "Menu item added successfully" });
+  db.query(
+  "INSERT INTO menu (name, price, description, category_id, image_url) VALUES (?, ?, ?, ?, ?)",
+  [name, price, description || "", categoryId, imageUrl],
+  (err) => {
+    if (err) {
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({ error: "A menu item with this name already exists in this category." });
       }
-    );
+      return res.status(500).json({ error: err.sqlMessage || err.message || "Item insertion error" });
+    }
+    res.json({ message: "Menu item added successfully" });
+  }
+);
   });
-};
+}
 
 export const getMenu = (req, res) => {
   db.query(
@@ -113,12 +115,14 @@ export const updateMenuItem = (req, res) => {
     values.push(id);
 
     db.query(`UPDATE menu SET ${fields.join(", ")} WHERE id = ?`, values, (err) => {
-      if (err) {
-        console.error("SQL Error in updateMenuItem:", err);
-        return res.status(500).json({ error: err.sqlMessage || err.message || "menu item update error" });
-      }
-      res.json({ message: "Menu item updated successfully" });
-    });
+  if (err) {
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ error: "A menu item with this name already exists in this category." });
+    }
+    return res.status(500).json({ error: err.sqlMessage || err.message || "menu item update error" });
+  }
+  res.json({ message: "Menu item updated successfully" });
+});
   });
 };
 

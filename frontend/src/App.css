@@ -263,7 +263,7 @@ small { font-size: var(--text-sm); }
 
 /* Navbar */
 .navbar{
-background: rgba(236, 245, 178, 0.438);
+background: rgba(200, 246, 160, 0.59);
   border-bottom: 2px solid var(--ink-light);
  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   z-index: 100;
@@ -286,9 +286,9 @@ background: rgba(236, 245, 178, 0.438);
 
 .brand-logo {
   border-radius: 50%;
-  height: 80px;
+  height: 60px;
   object-fit: cover;
-  width: 80px;
+  width: 60px;
   box-shadow: 0 4px 12px rgba(0 0 0 /53%);
 }
 
