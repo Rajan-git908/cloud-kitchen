@@ -358,12 +358,19 @@ export const updateOrderStatus = (req, res) => {
     return res.status(400).json({ error: "Status field is required" });
   }
 
+  // 1. Auto-set payment_status to 'Completed' if order status is set to 'Completed'
+  let targetPaymentStatus = payment_status;
+  if (!targetPaymentStatus && status === "Completed") {
+    targetPaymentStatus = "Completed";
+  }
+
+  // 2. Build dynamic SQL query for orders table
   const fields = ["status = ?"];
   const values = [status];
 
-  if (payment_status) {
+  if (targetPaymentStatus) {
     fields.push("payment_status = ?");
-    values.push(payment_status);
+    values.push(targetPaymentStatus);
   }
 
   values.push(id);
@@ -374,7 +381,20 @@ export const updateOrderStatus = (req, res) => {
     (err, result) => {
       if (err) return res.status(500).json({ error: err.message || "Database error" });
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Error updating order status" });
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // 3. Keep payments audit table synchronized if payment_status changed
+      if (targetPaymentStatus) {
+        db.query(
+          `UPDATE payments SET status = ? WHERE order_id = ?`,
+          [targetPaymentStatus, id],
+          (payErr) => {
+            if (payErr) {
+              console.error("Failed to sync payments table status:", payErr.message);
+            }
+          }
+        );
       }
 
       res.json({ message: "Order status updated successfully" });

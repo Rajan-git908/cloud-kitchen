@@ -105,7 +105,7 @@ export const verifyEsewaPayment = (req, res) => {
 
     // 4. Update Database Order
     db.query(
-      "UPDATE orders SET status = 'Preparing', payment_status = 'Completed' WHERE id = ?",
+      "UPDATE orders SET status = 'Preparing', payment_status = 'Completed', payment_method = 'ESEWA' WHERE id = ?",
       [orderId],
       (err) => {
         if (err) {
@@ -115,7 +115,7 @@ export const verifyEsewaPayment = (req, res) => {
 
         // Also update payments tracking table safely
         db.query(
-          "UPDATE payments SET status = 'Completed', transaction_code = ? WHERE order_id = ?",
+          "UPDATE payments SET status = 'Completed',payment_method = 'ESEWA', transaction_code = ? WHERE order_id = ?",
           [transaction_code, orderId],
           (payErr) => {
             if (payErr) {

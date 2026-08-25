@@ -119,6 +119,7 @@ export default function UserDashboard() {
                 <th>Status</th>
                 <th>Total</th>
                 <th>Date</th>
+                <th>Receipt</th>
               </tr>
             </thead>
             <tbody>
@@ -150,6 +151,18 @@ export default function UserDashboard() {
                     </td>
                     <td>Rs. {Number(order.total) + 150}</td>
                     <td>{new Date(order.created_at).toLocaleString()}</td>
+                    <td>
+  {order.payment_status === "Completed" ? (
+    <button 
+      className="btn btn-sm btn-outline-success"
+      onClick={() => setReceiptOrder(order)}
+    >
+      Receipt
+    </button>
+  ) : (
+    <span className="text-muted">Payment Pending</span>
+  )}
+</td>
                   </tr>
                 );
               })}

@@ -34,6 +34,7 @@ export default function OrdersSection({
               <th>Payment</th>
               <th>Date</th>
               <th>Status</th>
+              <th>Receipt</th>
             </tr>
           </thead>
           <tbody>
@@ -87,6 +88,18 @@ export default function OrdersSection({
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </td>
+                    <td>
+  {order.payment_status === "Completed" ? (
+    <button 
+      className="btn btn-sm btn-outline-success"
+      onClick={() => setReceiptOrder(order)}
+    >
+      Receipt
+    </button>
+  ) : (
+    <span className="text-muted">Payment Pending</span>
+  )}
+</td>
                   </tr>
                 );
               })
