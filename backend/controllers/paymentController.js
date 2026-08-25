@@ -1,4 +1,5 @@
 import db from "../models/db.js";
+import crypto from "crypto";
 import { generateEsewaSignature } from "../utils/esewa.js";
 
 export const initiateEsewaPayment = (req, res) => {
@@ -14,8 +15,6 @@ export const initiateEsewaPayment = (req, res) => {
     }
 
     const order = results[0];
-    
-    // eSewa requires exactly two decimal places (e.g., "250.00")
     const totalAmount = Number(order.total).toFixed(2);
     const transactionUuid = `${order.id}-${Date.now()}`;
     const productCode = process.env.ESEWA_PRODUCT_CODE || "EPAYTEST";
@@ -48,47 +47,77 @@ export const initiateEsewaPayment = (req, res) => {
 };
 
 export const verifyEsewaPayment = (req, res) => {
-  const { data } = req.body;
+  // Support payload sent via query param or body
+  const data = req.body?.data || req.query?.data;
 
   if (!data) {
     return res.status(400).json({ error: "Response payload missing" });
   }
 
   try {
-    // Decode eSewa's base64 response string
+    // 1. Decode eSewa's base64 string
     const decodedString = Buffer.from(data, "base64").toString("utf-8");
     const decodedData = JSON.parse(decodedString);
 
-    const { total_amount, transaction_uuid, product_code, signature, status } = decodedData;
-    const secretKey = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q";
-
-    const expectedSignature = generateEsewaSignature(
+    const {
+      transaction_code,
+      status,
       total_amount,
       transaction_uuid,
       product_code,
-      secretKey
-    );
-
-    if (signature !== expectedSignature) {
-      return res.status(400).json({ error: "Signature verification failed" });
-    }
+      signed_field_names,
+      signature
+    } = decodedData;
 
     if (status !== "COMPLETE") {
       return res.status(400).json({ error: "Payment not completed" });
     }
 
-    // Extract original Database Order ID from "ORDERID-TIMESTAMP" string
+    const secretKey = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q";
+
+    // 2. Build verification signature dynamically from signed_field_names
+    // eSewa return format: transaction_code=VALUE,status=VALUE,total_amount=VALUE,transaction_uuid=VALUE,product_code=VALUE,signed_field_names=VALUE
+    const map = {
+      transaction_code,
+      status,
+      total_amount,
+      transaction_uuid,
+      product_code,
+      signed_field_names
+    };
+
+    const signatureString = signed_field_names
+      .split(",")
+      .map((field) => `${field}=${map[field]}`)
+      .join(",");
+
+    const expectedSignature = crypto
+      .createHmac("sha256", secretKey)
+      .update(signatureString)
+      .digest("base64");
+
+    if (signature !== expectedSignature) {
+      console.error("Signature Mismatch:", { expectedSignature, receivedSignature: signature, signatureString });
+      return res.status(400).json({ error: "Signature verification failed" });
+    }
+
+    // 3. Extract Order ID
     const orderId = transaction_uuid.split("-")[0];
 
+    // 4. Update Database Order
     db.query(
       "UPDATE orders SET status = 'Preparing' WHERE id = ?",
       [orderId],
       (err) => {
-        if (err) return res.status(500).json({ error: "Database update error" });
-        res.json({ message: "Payment success", order_id: orderId });
+        if (err) {
+          console.error("Database update error:", err);
+          return res.status(500).json({ error: "Database update error" });
+        }
+        res.json({ message: "Payment verified successfully", order_id: orderId });
       }
     );
   } catch (err) {
-    return res.status(500).json({ error: "Invalid payload format" });
+    console.error("Verification processing error:", err);
+    return res.status(400).json({ error: "Invalid payload or parsing error" });
   }
 };
