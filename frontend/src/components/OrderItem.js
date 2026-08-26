@@ -25,16 +25,6 @@ export default function OrderItemModal({ order, onClose }) {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Pending": return "⏳";
-      case "Preparing": return "👨‍🍳";
-      case "Out for Delivery": return "🚚";
-      case "Completed": return "✅";
-      case "Cancelled": return "❌";
-      default: return "📦";
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -79,7 +69,7 @@ export default function OrderItemModal({ order, onClose }) {
               <div className="oim-meta-item">
                 <span className="oim-meta-label">Status:</span>
                 <span className={`oim-badge ${getStatusClass(order.status)}`}>
-                  {getStatusIcon(order.status)} {order.status}
+                   {order.status}
                 </span>
               </div>
               {order.user_name && (
