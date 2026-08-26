@@ -79,9 +79,49 @@ function Checkout() {
 
       const targetAddress = deliveryAddress || user?.location || "Standard Delivery";
 
-     
+     if (paymentMethod === "ESEWA") {
+  // Step 1: Save order first
+  const orderRes = await axios.post(
+    `${apiBaseUrl}/api/orders`,
+    {
+      total: grandTotal,
+      items: itemsPayload,
+      delivery_address: targetAddress
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  const orderId = orderRes.data.id; // ✅ get order ID
+
+  // Step 2: Initiate eSewa payment with order_id
+  const payRes = await axios.post(
+    `${apiBaseUrl}/api/payment/esewa/initiate`,
+    { order_id: orderId }, // ✅ backend requires this
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  // Step 3: Redirect to eSewa portal
+  submitToEsewa(payRes.data);
+} else {
+  // Cash on Delivery
+  await axios.post(
+    `${apiBaseUrl}/api/orders`,
+    {
+      total: grandTotal,
+      items: itemsPayload,
+      delivery_address: targetAddress
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  clearCart();
+  setStatus("Order confirmed. Your kitchen is on it.");
+  setLoading(false);
+}
+
 
       // 2. Process based on selected payment method
+      /*
       if (paymentMethod === "ESEWA") {
         const payRes = await axios.post(
           `${apiBaseUrl}/api/payment/esewa/initiate`,
@@ -105,11 +145,13 @@ function Checkout() {
           },
           {headers:{Authorization:`Bearer ${token}`}}
         );
-*/
+//--------------
         clearCart();
         setStatus("Order confirmed. Your kitchen is on it.");
         setLoading(false);
       }
+
+      */
     } catch (error) {
       console.error("Order placement failed:", error.response || error);
       setStatus(
