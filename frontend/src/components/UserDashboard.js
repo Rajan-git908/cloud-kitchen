@@ -5,6 +5,9 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import OrderItem from "./OrderItem";
 
+import ReceiptModal from "./ReceiptModel";
+import "./Css/Receiptmodel.css";
+
 export default function UserDashboard() {
   const { token, apiBaseUrl } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
@@ -171,14 +174,21 @@ export default function UserDashboard() {
           </table>
         )}
 
-        <AnimatePresence>
-          {selectedOrder && (
-            <OrderItem
-              order={selectedOrder}
-              onClose={() => setSelectedOrder(null)}
-            />
-          )}
-        </AnimatePresence>
+<AnimatePresence>
+  {selectedOrder && (
+    <OrderItem
+      order={selectedOrder}
+      onClose={() => setSelectedOrder(null)}
+    />
+  )}
+
+  {receiptOrder && (
+    <ReceiptModal
+      order={receiptOrder}
+      onClose={() => setReceiptOrder(null)}
+    />
+  )}
+</AnimatePresence>
       </div>
     </motion.div>
   );

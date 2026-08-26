@@ -447,6 +447,7 @@ background: rgba(200, 246, 160, 0.59);
   color: white;
   display: grid;
   gap: var(--space-2xl);
+  grid-template-columns: 1fr 1fr;
   min-height: min(700px, calc(100vh - 80px));
   overflow: hidden;
   padding: clamp(var(--space-2xl), 8vw, var(--space-3xl)) clamp(var(--space-lg), 5vw, var(--space-2xl));

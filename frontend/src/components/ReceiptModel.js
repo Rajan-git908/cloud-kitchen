@@ -1,6 +1,6 @@
 // frontend/src/components/ReceiptModal.js
 import React from "react";
-import "./ReceiptModal.css"; // Simple styling for print view
+import "./Css/Receiptmodel.css";
 
 export default function ReceiptModal({ order, onClose }) {
   if (!order) return null;
