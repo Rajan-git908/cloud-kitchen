@@ -2,7 +2,7 @@
   align-items: center;
   background: 
     linear-gradient(135deg, rgba(19, 239, 45, 0.568) 0%, rgba(205, 238, 18, 0) 50%, rgba(228, 53, 18, 0.289) 100%),
-    url("../Image/cover_image.avif") center/cover no-repeat fixed;
+    url("../../Image/cover_image.avif") center/cover no-repeat fixed;
   display: flex;
   justify-content: center;
   min-height: calc(100vh - 78px);
@@ -312,8 +312,8 @@
     font-size: 1.8rem;
   }
 }
-
-/* Forgot Password Page Styles */
+/*
+// Forgot Password Page Styles 
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -520,3 +520,4 @@
   box-shadow: 0 12px 28px rgba(217, 237, 104, 0.4);
   transform: translateY(-2px);
 }
+*/

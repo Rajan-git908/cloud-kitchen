@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
-import "./AuthForms.css";
+import "./Css/AuthForms.css";
 
 const FULL_NAME_REGEX = /^[A-Z][a-z]{2,}(?: [A-Z][a-z]{2,}){1,3}$/;
 const PHONE_REGEX = /^(98|97)\d{8}$/;

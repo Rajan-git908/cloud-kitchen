@@ -41,7 +41,7 @@ function Navbar() {
     <nav className="navbar">
       <Link to="/" className="navbar-brand" onClick={closeMobileMenu}>
         <img className="brand-logo" src={logo} alt="Cloud Kitchen logo" />
-        Cloud Kitchen
+        CloudKitchen
       </Link>
 
       <button

@@ -10,6 +10,7 @@ export default function UserDashboard() {
   const [orders, setOrders] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [receiptOrder, setReceiptOrder] = useState(null);
 
   useEffect(() => {
     if (token) {

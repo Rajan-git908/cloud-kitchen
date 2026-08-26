@@ -9,6 +9,7 @@ export default function OrdersSection({
   getStatusColor,
 }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [receiptOrder, setReceiptOrder] = useState(null);
 
   return (
     <motion.div
@@ -89,17 +90,17 @@ export default function OrdersSection({
                       </select>
                     </td>
                     <td>
-  {order.payment_status === "Completed" ? (
-    <button 
-      className="btn btn-sm btn-outline-success"
-      onClick={() => setReceiptOrder(order)}
-    >
-      Receipt
-    </button>
-  ) : (
-    <span className="text-muted">Payment Pending</span>
-  )}
-</td>
+                      {order.payment_status === "Completed" ? (
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() => setReceiptOrder(order)}
+                        >
+                          Receipt
+                        </button>
+                      ) : (
+                        <span className="text-muted">Payment Pending</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })

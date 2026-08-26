@@ -253,7 +253,7 @@ small { font-size: var(--text-sm); }
 .form-control:focus,
 .auth-input:focus {
   border-color: var(--coral);
-  box-shadow: 0 0 0 4px rgba(238, 118, 94, .12);
+  box-shadow: 0 0 0 4px rgba(238, 118, 94, 0.12);
   outline: none;
 }
 
@@ -273,7 +273,8 @@ background: rgba(200, 246, 160, 0.59);
 .navbar-brand {
   align-items: center;
   display: flex;
-  font-family: "Times new roman", serif;
+  font-family: "Great vibes", cursive;
+  font-size: 3.5rem;
   font-weight: 700;
   gap: var(--space-md);
   transition: color 0.3s ease;
@@ -282,6 +283,7 @@ background: rgba(200, 246, 160, 0.59);
 
 .navbar-brand:hover {
   color: var(--primary);
+  
 }
 
 .brand-logo {
@@ -289,15 +291,16 @@ background: rgba(200, 246, 160, 0.59);
   height: 60px;
   object-fit: cover;
   width: 60px;
-  box-shadow: 0 4px 12px rgba(0 0 0 /53%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.53);
 }
 
 .nav-links {
   align-items: center;
   justify-items: center;
   display: flex;
+  font-family: "poppins", sans-serif;
   font-size: large;
-  font-weight: 600;
+  font-weight: 500;
   gap: 50px;
 }
 
@@ -431,7 +434,8 @@ background: rgba(200, 246, 160, 0.59);
 .page-wrap,
 .menu-container,
 .review-card {
-  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
   padding: 20px 10px 10px 10px;
 }
 
@@ -450,7 +454,7 @@ background: rgba(200, 246, 160, 0.59);
   margin-bottom: var(--space-3xl);
 }
 .hero{
- background: linear-gradient(135deg, rgba(250, 59, 75, 0.612), rgba(15, 242, 216, 0.514)),
+ background: linear-gradient(135deg, rgba(250, 89, 102, 0.514), rgba(15, 242, 216, 0.514)),
     url("Image/cover_image.avif") center/cover;
 }
 .kitchen-story-image{

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import "./OrderItem.css";
+import "./Css/OrderItem.css"; // Corrected import statement for CSS
 
 export default function OrderItemModal({ order, onClose }) {
   // Close modal when pressing the Escape key

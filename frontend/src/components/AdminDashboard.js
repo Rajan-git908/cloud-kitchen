@@ -8,8 +8,8 @@ import ReviewSection from "./Admin/ReviewSection";
 import MenuSection from "./Admin/MenuSection";
 import OrderSection from "./Admin/OrderSection";
 import UserSection from "./Admin/UserSection";
+import "./Css/AdminDashboard.css"; // Corrected import statement for CSS
 
-import "./AdminDashboard.css"; // Imported separate CSS stylesheet
 
 const menuCategories = [
   "Main Meals",
