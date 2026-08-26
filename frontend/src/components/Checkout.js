@@ -97,7 +97,7 @@ function Checkout() {
         submitToEsewa(payRes.data);
       } else {
         // Cash on Delivery Option
-        const orderRes=await axios.post(`${apiBaseUrl}/api/orders`,
+       /* const orderRes=await axios.post(`${apiBaseUrl}/api/orders`,
           {
             total:grandTotal,
             items:itemsPayload,
@@ -105,7 +105,7 @@ function Checkout() {
           },
           {headers:{Authorization:`Bearer ${token}`}}
         );
-
+*/
         clearCart();
         setStatus("Order confirmed. Your kitchen is on it.");
         setLoading(false);

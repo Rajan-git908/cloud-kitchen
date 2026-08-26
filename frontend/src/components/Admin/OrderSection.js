@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderItem from "../OrderItem";
+import ReceiptModal from "../ReceiptModel";
+import "../Css/Receiptmodel.css";
+
 
 export default function OrdersSection({
   orders,
@@ -10,6 +13,7 @@ export default function OrdersSection({
 }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [receiptOrder, setReceiptOrder] = useState(null);
+
 
   return (
     <motion.div
@@ -90,17 +94,17 @@ export default function OrdersSection({
                       </select>
                     </td>
                     <td>
-                      {order.payment_status === "Completed" ? (
-                        <button
-                          className="btn btn-sm btn-outline-success"
-                          onClick={() => setReceiptOrder(order)}
-                        >
-                          Receipt
-                        </button>
-                      ) : (
-                        <span className="text-muted">Payment Pending</span>
-                      )}
-                    </td>
+  {order.payment_status === "Completed" ? (
+    <button
+      className="btn btn-sm btn-outline-success"
+      onClick={() => setReceiptOrder(order)}
+    >
+      Receipt
+    </button>
+  ) : (
+    <span className="text-muted">Payment Pending</span>
+  )}
+</td>
                   </tr>
                 );
               })
@@ -117,13 +121,21 @@ export default function OrdersSection({
 
       {/* Item Details Modal with AnimatePresence */}
       <AnimatePresence>
-        {selectedOrder && (
-          <OrderItem
-            order={selectedOrder}
-            onClose={() => setSelectedOrder(null)}
-          />
-        )}
-      </AnimatePresence>
+  {selectedOrder && (
+    <OrderItem
+      order={selectedOrder}
+      onClose={() => setSelectedOrder(null)}
+    />
+  )}
+
+  {receiptOrder && (
+    <ReceiptModal
+      order={receiptOrder}
+      onClose={() => setReceiptOrder(null)}
+    />
+  )}
+</AnimatePresence>
+
     </motion.div>
   );
 }
